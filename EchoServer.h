@@ -1,9 +1,9 @@
 #pragma once
-#include "Server.h"
-#include "ThreadPool.h"
-#include "InetAddress.h"
+#include "tcp/Server.h"
+#include "tcp/ThreadPool.h"
+#include "tcp/InetAddress.h"
 #include <sys/syscall.h>
-#include"TimeStamp.h"
+#include"tcp/TimeStamp.h"
 class EchoServer
 {
 public:

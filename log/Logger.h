@@ -1,7 +1,7 @@
 #pragma once
 #include"LogStream.h"
-#include "../TimeStamp.h"
-#include "../CurrentThread.h"
+#include "../tcp/TimeStamp.h"
+#include "../tcp/CurrentThread.h"
 #include"AsyncLogger.h"
 #include <memory>
 #include <assert.h>

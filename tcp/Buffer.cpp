@@ -40,6 +40,16 @@ void Buffer::Append(const char* data, size_t len) {
     WriteIndex_ += len;
 }
 
+void Buffer::Append(const std::string &str)
+{
+    Append(str.data(), str.size());
+}
+
+void Buffer::Append(const char *data)
+{
+    Append(data, strlen(data));
+}
+
 void Buffer::EnsureWritableBytes(size_t len) {
     if (WritableBytes() < len) {
         if (PrependableBytes() + WritableBytes() >= len + PrependSize) {

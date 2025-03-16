@@ -2,7 +2,8 @@
 #define BUFFER_H
 
 #include <vector>
-#include<string>
+#include <string>
+#include <cstring>
 #include <cstddef>  // for size_t
 #include <sys/uio.h> // for struct iovec
 #include <algorithm> // for std::copy, std::min
@@ -41,6 +42,8 @@ public:
 
     // 追加数据到缓冲区
     void Append(const char* data, size_t len);
+    void Append(const std::string& str);
+    void Append(const char*data);
 
     // 确保有足够的可写空间
     void EnsureWritableBytes(size_t len);
