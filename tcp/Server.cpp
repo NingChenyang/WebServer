@@ -81,10 +81,24 @@ void Server::HandleNewConntion(int cfd, const InetAddress &peerAddr)
 		std::lock_guard<std::mutex> lock(mutex_);
 		connections_[cfd] = conn;
 	}
-	conn->SetOnMessageCallback(messageCallback_);
-	conn->SetOnConnectedCallback(connectedCallback_);
-	conn->SetOnClosedCallback(closedCallback_);
-	conn->SetOnSentCallback(sentCallback_);
+
+	// 确保所有回调都被设置
+	if (messageCallback_)
+	{
+		conn->SetOnMessageCallback(messageCallback_);
+	}
+	if (connectedCallback_)
+	{
+		conn->SetOnConnectedCallback(connectedCallback_);
+	}
+	if (closedCallback_)
+	{
+		conn->SetOnClosedCallback(closedCallback_);
+	}
+	if (sentCallback_)
+	{
+		conn->SetOnSentCallback(sentCallback_);
+	}
 
 	conn->SetCloseCallback([this](const ConnectionPtr &conn)
 						   { HandleRemoveConntion(conn); });

@@ -1,0 +1,298 @@
+19700101 08:29:02.466850 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466850 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466850 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466850 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466850 43472 INFO  Read 551 bytes from fd 21 - tcp/Connection.cpp:185
+19700101 08:29:02.466850 43472 INFO  Received message from 172.21.208.1:2759, size=551 - http/HttpServer.cpp:64
+19700101 08:29:02.466850 43472 INFO  Got complete request, path=/index.html - http/HttpServer.cpp:93
+19700101 08:29:02.466850 43472 INFO  Handling request for path: /index.html - HTTP.cpp:12
+19700101 08:29:02.466850 43472 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466850 43472 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466850 43472 INFO  Sending response, size=1779 - http/HttpServer.cpp:134
+19700101 08:29:02.466850 43472 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466850 43472 INFO  172.21.208.1:2759 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466850 43472 INFO  Read 381 bytes from fd 21 - tcp/Connection.cpp:185
+19700101 08:29:02.466850 43472 INFO  Received message from 172.21.208.1:2759, size=381 - http/HttpServer.cpp:64
+19700101 08:29:02.466850 43472 INFO  Got complete request, path=/css/style.css - http/HttpServer.cpp:93
+19700101 08:29:02.466850 43472 INFO  Handling request for path: /css/style.css - HTTP.cpp:12
+19700101 08:29:02.466850 43472 INFO  Full filepath: ./css/style.css - HTTP.cpp:20
+19700101 08:29:02.466850 43472 INFO  File found, size=2028 - HTTP.cpp:33
+19700101 08:29:02.466850 43472 INFO  Sending response, size=2190 - http/HttpServer.cpp:134
+19700101 08:29:02.466850 43472 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466850 43472 INFO  172.21.208.1:2759 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466850 43472 INFO  Read 425 bytes from fd 21 - tcp/Connection.cpp:185
+19700101 08:29:02.466850 43472 INFO  Received message from 172.21.208.1:2759, size=425 - http/HttpServer.cpp:64
+19700101 08:29:02.466850 43472 INFO  Got complete request, path=/favicon.ico - http/HttpServer.cpp:93
+19700101 08:29:02.466850 43472 INFO  Handling request for path: /favicon.ico - HTTP.cpp:12
+19700101 08:29:02.466850 43472 INFO  Full filepath: ./favicon.ico - HTTP.cpp:20
+19700101 08:29:02.466850 43472 INFO  File found, size=4286 - HTTP.cpp:33
+19700101 08:29:02.466850 43472 INFO  Sending response, size=4452 - http/HttpServer.cpp:134
+19700101 08:29:02.466850 43472 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466850 43472 INFO  172.21.208.1:2759 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466851 43472 INFO  Read 525 bytes from fd 21 - tcp/Connection.cpp:185
+19700101 08:29:02.466851 43472 INFO  Received message from 172.21.208.1:2759, size=525 - http/HttpServer.cpp:64
+19700101 08:29:02.466851 43472 INFO  Got complete request, path=/about.html - http/HttpServer.cpp:93
+19700101 08:29:02.466851 43472 INFO  Handling request for path: /about.html - HTTP.cpp:12
+19700101 08:29:02.466851 43472 INFO  Full filepath: ./about.html - HTTP.cpp:20
+19700101 08:29:02.466851 43472 INFO  File found, size=730 - HTTP.cpp:33
+19700101 08:29:02.466851 43472 INFO  Sending response, size=892 - http/HttpServer.cpp:134
+19700101 08:29:02.466851 43472 INFO  Response content: 
+HTTP/1.1 200 OK
+Connection: Keep-Alive
+Content-Length: 730
+Keep-Alive: timeout=60
+Connection: Keep-Alive
+Server: MyWebServer/1.0
+Content-Type: text/html
+
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>关于 - 我的Web服务器</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">首页</a></li>
+            <li><a href="about.html" class="active">关于</a></li>
+            <li><a href="contact.html">联系我们</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h1>关于我们</h1>
+        <p>这是一个基于C++的高性能Web服务器项目。</p>
+        <h2>主要特性：</h2>
+        <ul>
+            <li>多线程处理</li>
+            <li>异步IO</li>
+            <li>支持HTTP协议</li>
+        </ul>
+    </div>
+</body>
+
+</html> - http/HttpServer.cpp:135
+19700101 08:29:02.466851 43472 INFO  172.21.208.1:2759 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466851 43472 INFO  Read 381 bytes from fd 21 - tcp/Connection.cpp:185
+19700101 08:29:02.466851 43472 INFO  Received message from 172.21.208.1:2759, size=381 - http/HttpServer.cpp:64
+19700101 08:29:02.466851 43472 INFO  Got complete request, path=/css/style.css - http/HttpServer.cpp:93
+19700101 08:29:02.466851 43472 INFO  Handling request for path: /css/style.css - HTTP.cpp:12
+19700101 08:29:02.466851 43472 INFO  Full filepath: ./css/style.css - HTTP.cpp:20
+19700101 08:29:02.466851 43472 INFO  File found, size=2028 - HTTP.cpp:33
+19700101 08:29:02.466851 43472 INFO  Sending response, size=2190 - http/HttpServer.cpp:134
+19700101 08:29:02.466851 43472 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466851 43472 INFO  172.21.208.1:2759 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466851 43472 INFO  Read 525 bytes from fd 21 - tcp/Connection.cpp:185
+19700101 08:29:02.466851 43472 INFO  Received message from 172.21.208.1:2759, size=525 - http/HttpServer.cpp:64
+19700101 08:29:02.466851 43472 INFO  Got complete request, path=/index.html - http/HttpServer.cpp:93
+19700101 08:29:02.466851 43472 INFO  Handling request for path: /index.html - HTTP.cpp:12
+19700101 08:29:02.466851 43472 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466851 43472 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466851 43472 INFO  Sending response, size=1779 - http/HttpServer.cpp:134
+19700101 08:29:02.466851 43472 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466851 43472 INFO  172.21.208.1:2759 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466851 43472 INFO  Read 381 bytes from fd 21 - tcp/Connection.cpp:185
+19700101 08:29:02.466851 43472 INFO  Received message from 172.21.208.1:2759, size=381 - http/HttpServer.cpp:64
+19700101 08:29:02.466851 43472 INFO  Got complete request, path=/css/style.css - http/HttpServer.cpp:93
+19700101 08:29:02.466851 43472 INFO  Handling request for path: /css/style.css - HTTP.cpp:12
+19700101 08:29:02.466851 43472 INFO  Full filepath: ./css/style.css - HTTP.cpp:20
+19700101 08:29:02.466851 43472 INFO  File found, size=2028 - HTTP.cpp:33
+19700101 08:29:02.466851 43472 INFO  Sending response, size=2190 - http/HttpServer.cpp:134
+19700101 08:29:02.466851 43472 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466851 43472 INFO  172.21.208.1:2759 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466858 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466858 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466858 43473 INFO  Connection closed by peer - tcp/Connection.cpp:190
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43473 INFO  Read 66 bytes from fd 24 - tcp/Connection.cpp:185
+19700101 08:29:02.466859 43473 INFO  Received message from 172.21.211.240:33472, size=66 - http/HttpServer.cpp:64
+19700101 08:29:02.466859 43473 INFO  Got complete request, path=/ - http/HttpServer.cpp:93
+19700101 08:29:02.466859 43473 INFO  Handling request for path: / - HTTP.cpp:12
+19700101 08:29:02.466859 43473 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466859 43471 INFO  Read 66 bytes from fd 26 - tcp/Connection.cpp:185
+19700101 08:29:02.466859 43471 INFO  Received message from 172.21.211.240:33486, size=66 - http/HttpServer.cpp:64
+19700101 08:29:02.466859 43471 INFO  Got complete request, path=/ - http/HttpServer.cpp:93
+19700101 08:29:02.466859 43471 INFO  Handling request for path: / - HTTP.cpp:12
+19700101 08:29:02.466859 43471 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466859 43473 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466859 43473 INFO  Sending response, size=1704 - http/HttpServer.cpp:134
+19700101 08:29:02.466859 43473 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466859 43471 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466859 43473 INFO  172.21.211.240:33472 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466859 43473 INFO  Closing connection after response - http/HttpServer.cpp:142
+19700101 08:29:02.466859 43471 INFO  Sending response, size=1704 - http/HttpServer.cpp:134
+19700101 08:29:02.466859 43471 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466859 43471 INFO  172.21.211.240:33486 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466859 43471 INFO  Closing connection after response - http/HttpServer.cpp:142
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43473 INFO  Read 66 bytes from fd 28 - tcp/Connection.cpp:185
+19700101 08:29:02.466859 43473 INFO  Received message from 172.21.211.240:33520, size=66 - http/HttpServer.cpp:64
+19700101 08:29:02.466859 43473 INFO  Got complete request, path=/ - http/HttpServer.cpp:93
+19700101 08:29:02.466859 43473 INFO  Handling request for path: / - HTTP.cpp:12
+19700101 08:29:02.466859 43473 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43473 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466859 43473 INFO  Sending response, size=1704 - http/HttpServer.cpp:134
+19700101 08:29:02.466859 43473 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43471 INFO  Read 66 bytes from fd 30 - tcp/Connection.cpp:185
+19700101 08:29:02.466859 43471 INFO  Received message from 172.21.211.240:33548, size=66 - http/HttpServer.cpp:64
+19700101 08:29:02.466859 43471 INFO  Got complete request, path=/ - http/HttpServer.cpp:93
+19700101 08:29:02.466859 43471 INFO  Handling request for path: / - HTTP.cpp:12
+19700101 08:29:02.466859 43471 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466859 43473 INFO  172.21.211.240:33520 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466859 43473 INFO  Closing connection after response - http/HttpServer.cpp:142
+19700101 08:29:02.466859 43471 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466859 43471 INFO  Sending response, size=1704 - http/HttpServer.cpp:134
+19700101 08:29:02.466859 43471 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466859 43472 INFO  Read 66 bytes from fd 29 - tcp/Connection.cpp:185
+19700101 08:29:02.466859 43472 INFO  Received message from 172.21.211.240:33536, size=66 - http/HttpServer.cpp:64
+19700101 08:29:02.466859 43472 INFO  Got complete request, path=/ - http/HttpServer.cpp:93
+19700101 08:29:02.466859 43472 INFO  Handling request for path: / - HTTP.cpp:12
+19700101 08:29:02.466859 43472 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466859 43474 INFO  Read 66 bytes from fd 27 - tcp/Connection.cpp:185
+19700101 08:29:02.466859 43471 INFO  172.21.211.240:33548 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466859 43471 INFO  Closing connection after response - http/HttpServer.cpp:142
+19700101 08:29:02.466859 43474 INFO  Received message from 172.21.211.240:33514, size=66 - http/HttpServer.cpp:64
+19700101 08:29:02.466859 43474 INFO  Got complete request, path=/ - http/HttpServer.cpp:93
+19700101 08:29:02.466859 43474 INFO  Handling request for path: / - HTTP.cpp:12
+19700101 08:29:02.466859 43474 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466859 43472 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466859 43472 INFO  Sending response, size=1704 - http/HttpServer.cpp:134
+19700101 08:29:02.466859 43472 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466859 43474 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466859 43474 INFO  Sending response, size=1704 - http/HttpServer.cpp:134
+19700101 08:29:02.466859 43474 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466859 43474 INFO  172.21.211.240:33514 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466859 43474 INFO  Closing connection after response - http/HttpServer.cpp:142
+19700101 08:29:02.466859 43472 INFO  172.21.211.240:33536 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466859 43472 INFO  Closing connection after response - http/HttpServer.cpp:142
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43474 INFO  Read 66 bytes from fd 31 - tcp/Connection.cpp:185
+19700101 08:29:02.466859 43474 INFO  Received message from 172.21.211.240:33474, size=66 - http/HttpServer.cpp:64
+19700101 08:29:02.466859 43474 INFO  Got complete request, path=/ - http/HttpServer.cpp:93
+19700101 08:29:02.466859 43474 INFO  Handling request for path: / - HTTP.cpp:12
+19700101 08:29:02.466859 43474 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43473 INFO  Read 66 bytes from fd 32 - tcp/Connection.cpp:185
+19700101 08:29:02.466859 43473 INFO  Received message from 172.21.211.240:33578, size=66 - http/HttpServer.cpp:64
+19700101 08:29:02.466859 43473 INFO  Got complete request, path=/ - http/HttpServer.cpp:93
+19700101 08:29:02.466859 43473 INFO  Handling request for path: / - HTTP.cpp:12
+19700101 08:29:02.466859 43474 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466859 43473 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466859 43474 INFO  Sending response, size=1704 - http/HttpServer.cpp:134
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43474 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43471 INFO  Read 66 bytes from fd 34 - tcp/Connection.cpp:185
+19700101 08:29:02.466859 43471 INFO  Received message from 172.21.211.240:33592, size=66 - http/HttpServer.cpp:64
+19700101 08:29:02.466859 43473 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466859 43471 INFO  Got complete request, path=/ - http/HttpServer.cpp:93
+19700101 08:29:02.466859 43471 INFO  Handling request for path: / - HTTP.cpp:12
+19700101 08:29:02.466859 43471 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466859 43473 INFO  Sending response, size=1704 - http/HttpServer.cpp:134
+19700101 08:29:02.466859 43473 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43471 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466859 43471 INFO  Sending response, size=1704 - http/HttpServer.cpp:134
+19700101 08:29:02.466859 43471 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43474 INFO  172.21.211.240:33474 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466859 43474 INFO  Closing connection after response - http/HttpServer.cpp:142
+19700101 08:29:02.466859 43473 INFO  172.21.211.240:33578 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466859 43473 INFO  Closing connection after response - http/HttpServer.cpp:142
+19700101 08:29:02.466859 43474 INFO  Read 66 bytes from fd 35 - tcp/Connection.cpp:185
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43474 INFO  Received message from 172.21.211.240:33496, size=66 - http/HttpServer.cpp:64
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43474 INFO  Got complete request, path=/ - http/HttpServer.cpp:93
+19700101 08:29:02.466859 43474 INFO  Handling request for path: / - HTTP.cpp:12
+19700101 08:29:02.466859 43471 INFO  172.21.211.240:33592 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466859 43473 INFO  Read 66 bytes from fd 36 - tcp/Connection.cpp:185
+19700101 08:29:02.466859 43474 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466859 43471 INFO  Closing connection after response - http/HttpServer.cpp:142
+19700101 08:29:02.466859 43473 INFO  Received message from 172.21.211.240:33510, size=66 - http/HttpServer.cpp:64
+19700101 08:29:02.466859 43473 INFO  Got complete request, path=/ - http/HttpServer.cpp:93
+19700101 08:29:02.466859 43473 INFO  Handling request for path: / - HTTP.cpp:12
+19700101 08:29:02.466859 43473 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466859 43474 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466859 43472 INFO  Read 66 bytes from fd 33 - tcp/Connection.cpp:185
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43473 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466859 43472 INFO  Received message from 172.21.211.240:33562, size=66 - http/HttpServer.cpp:64
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43473 INFO  Sending response, size=1704 - http/HttpServer.cpp:134
+19700101 08:29:02.466859 43473 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43471 INFO  Read 66 bytes from fd 38 - tcp/Connection.cpp:185
+19700101 08:29:02.466859 43471 INFO  Received message from 172.21.211.240:33628, size=66 - http/HttpServer.cpp:64
+19700101 08:29:02.466859 43471 INFO  Got complete request, path=/ - http/HttpServer.cpp:93
+19700101 08:29:02.466859 43471 INFO  Handling request for path: / - HTTP.cpp:12
+19700101 08:29:02.466859 43471 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466859 43470 INFO  New connection established - http/HttpServer.cpp:45
+19700101 08:29:02.466859 43473 INFO  172.21.211.240:33510 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466859 43473 INFO  Closing connection after response - http/HttpServer.cpp:142
+19700101 08:29:02.466859 43471 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466859 43470 INFO  HttpContext created successfully - http/HttpServer.cpp:49
+19700101 08:29:02.466859 43471 INFO  Sending response, size=1704 - http/HttpServer.cpp:134
+19700101 08:29:02.466859 43471 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466859 43472 INFO  Got complete request, path=/ - http/HttpServer.cpp:93
+19700101 08:29:02.466859 43471 INFO  172.21.211.240:33628 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466859 43472 INFO  Handling request for path: / - HTTP.cpp:12
+19700101 08:29:02.466859 43471 INFO  Closing connection after response - http/HttpServer.cpp:142
+19700101 08:29:02.466859 43472 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466859 43474 INFO  Sending response, size=1704 - http/HttpServer.cpp:134
+19700101 08:29:02.466859 43474 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466859 43472 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466859 43472 INFO  Sending response, size=1704 - http/HttpServer.cpp:134
+19700101 08:29:02.466859 43474 INFO  172.21.211.240:33496 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466859 43472 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466859 43474 INFO  Closing connection after response - http/HttpServer.cpp:142
+19700101 08:29:02.466859 43472 INFO  172.21.211.240:33562 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466859 43472 INFO  Closing connection after response - http/HttpServer.cpp:142
+19700101 08:29:02.466859 43472 INFO  Read 66 bytes from fd 37 - tcp/Connection.cpp:185
+19700101 08:29:02.466859 43472 INFO  Received message from 172.21.211.240:33602, size=66 - http/HttpServer.cpp:64
+19700101 08:29:02.466859 43472 INFO  Got complete request, path=/ - http/HttpServer.cpp:93
+19700101 08:29:02.466859 43472 INFO  Handling request for path: / - HTTP.cpp:12
+19700101 08:29:02.466859 43472 INFO  Full filepath: ./index.html - HTTP.cpp:20
+19700101 08:29:02.466859 43472 INFO  File found, size=1616 - HTTP.cpp:33
+19700101 08:29:02.466859 43472 INFO  Sending response, size=1704 - http/HttpServer.cpp:134
+19700101 08:29:02.466859 43472 INFO  Response content: 
+ - http/HttpServer.cpp:135
+19700101 08:29:02.466859 43472 INFO  172.21.211.240:33602 write complete - http/HttpServer.cpp:150
+19700101 08:29:02.466859 43472 INFO  Closing connection after response - http/HttpServer.cpp:142

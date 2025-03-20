@@ -178,7 +178,10 @@ void Connection::HandleRead()
 	{
 		last_time_ = TimeStamp::Now();
 		LOG_INFO << "Read " << n << " bytes from fd " << fd();
-		messageCallback_(shared_from_this(), &input_buffer_);
+		if (messageCallback_)
+		{
+			messageCallback_(shared_from_this(), &input_buffer_);
+		}
 	}
 	else if (n == 0)
 	{
@@ -229,12 +232,17 @@ void Connection::HandleWrite()
 
 void Connection::HandleClose()
 {
-	assert(state_ == StateE::kConnected || state_ == StateE::kDisconnecting);
-	SetState(StateE::kDisconnected);
-	channel_->DisableAll();
-	ConnectionPtr guardThis(shared_from_this());
-	// printf("Connection::handleClose() guardThis(shared_from_this())后 user_count= %ld\n", guardThis.use_count());
-	closeCallback_(guardThis);
+	if (state_ == StateE::kConnected || state_ == StateE::kDisconnecting)
+	{
+		SetState(StateE::kDisconnected);
+		channel_->DisableAll();
+		ConnectionPtr guardThis(shared_from_this());
+		// printf("Connection::handleClose() guardThis(shared_from_this())后 user_count= %ld\n", guardThis.use_count());
+		if (closedCallback_)
+		{
+			closedCallback_(guardThis);
+		}
+	}
 	loop_->RemoveLoopConn(fd());
 	// closeCallback_就是Server::removeConnection()函数
 }
