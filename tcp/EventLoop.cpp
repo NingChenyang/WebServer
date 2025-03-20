@@ -11,8 +11,9 @@ int CreateTimerfd(int sec = 30)
 }
 void EventLoop::HandleWakeUp()
 {
-	uint64_t val = 1;
-	int ret = read(wake_up_fd_, &val, sizeof(uint64_t));
+	uint64_t val;
+	ssize_t ret = read(wake_up_fd_, &val, sizeof(uint64_t));
+	(void)ret; // 标记变量已使用
 	std::function<void()> fn;
 
 	std::lock_guard<std::mutex> lock(qmutex_);
@@ -81,6 +82,10 @@ EventLoop::EventLoop(bool is_main_loop, int time_tvl, int time_out)
 
 	wake_channel_->SetReadCallback(std::bind(&EventLoop::HandleWakeUp, this));
 	wake_channel_->EnableReading();
+	if (is_main_loop)
+	{
+		// 可以添加主事件循环特有的初始化
+	}
 }
 
 EventLoop::~EventLoop()
@@ -127,7 +132,8 @@ void EventLoop::AddLoopQueue(std::function<void()> fn)
 void EventLoop::WakeUp()
 {
 	uint64_t val = 1;
-	int ret = write(wake_up_fd_, &val, sizeof(uint64_t));
+	ssize_t ret = write(wake_up_fd_, &val, sizeof(uint64_t));
+	(void)ret; // 标记变量已使用
 }
 
 void EventLoop::UpdateChannel(Channel *ch)

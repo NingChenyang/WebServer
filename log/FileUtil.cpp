@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 AppendFile::AppendFile(const std::string &file_name)
-    : fp_(fopen(file_name.c_str(), "ae")), writtenBytes_(0)
+    : fp_(fopen(file_name.c_str(),"a")), writtenBytes_(0)
 {
     if (fp_ == nullptr)
     {

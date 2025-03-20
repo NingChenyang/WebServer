@@ -19,4 +19,5 @@ using OnSentCallback = std::function<void( ConnectionPtr)>;
 using OnClosedCallback = std::function<void( ConnectionPtr)>;
 using OnConnectedCallback = std::function<void( ConnectionPtr)>;
 // the data has been read to (buf, len)
-using OnMessageCallback = std::function<void(ConnectionPtr, std::string&)>;
+// using OnMessageCallback = std::function<void(ConnectionPtr, std::string &)>;
+using OnMessageCallback = std::function<void(ConnectionPtr, Buffer*)>;

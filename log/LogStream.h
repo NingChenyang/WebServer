@@ -17,6 +17,7 @@ public:
     }
     LogStream &operator<<(short);
     LogStream &operator<<(int);
+    LogStream &operator<<(size_t v);
     LogStream &operator<<(long);
     LogStream &operator<<(long long);
     LogStream &operator<<(float);

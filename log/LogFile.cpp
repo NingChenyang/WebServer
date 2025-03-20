@@ -1,6 +1,6 @@
 #include "LogFile.h"
-LogFile::LogFile(const std::string &basename, off_t roll_size, int flush_interval_second , int flush_everyN)
-    : basename_(basename), flush_everyN_(flush_everyN), file_(std::make_unique<AppendFile>(basename)), rollsize_(roll_size), count_(0), start_of_period_(0), last_roll_(0), flush_interval_second_(flush_interval_second)
+LogFile::LogFile(const std::string &basename, off_t roll_size, int flush_interval_second, int flush_everyN)
+    : basename_(basename), rollsize_(roll_size), flush_interval_second_(flush_interval_second), flush_everyN_(flush_everyN), count_(0), start_of_period_(0), last_roll_(0), file_(std::make_unique<AppendFile>(basename))
 {
     RollFile();
 }

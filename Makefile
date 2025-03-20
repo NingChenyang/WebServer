@@ -4,21 +4,26 @@ CXXFLAGS = -std=c++20 -Wall -Wextra -O2 -g
 
 # 目标文件
 TARGET = server
+HTTP_TARGET = server
 
-# 源文件(排除client.cpp)
-SRCS = $(wildcard *.cpp)
-SRCS := $(filter-out bin/x64/Debug/client.cpp, $(SRCS))
+# 使用wildcard自动获取所有.cpp文件
+TCP_SRCS := $(wildcard tcp/*.cpp)
+HTTP_SRCS := $(wildcard http/*.cpp)
+LOG_SRCS := $(wildcard log/*.cpp)
+
+# 合并所有源文件
+ALL_SRCS = HTTP.cpp $(TCP_SRCS) $(HTTP_SRCS) $(LOG_SRCS)
 
 # 头文件
 INCLUDES = -I./
 
 # 默认目标
-all: $(TARGET)
+all: $(HTTP_TARGET)
 
-# 直接编译服务器
-$(TARGET): $(SRCS)
+# 编译HTTP服务器
+$(HTTP_TARGET): $(ALL_SRCS)
 	$(CXX) $^ -o $@ $(CXXFLAGS) -pthread
 
 .PHONY: clean
 clean:
-	rm -f $(TARGET)
+	rm -f $(HTTP_TARGET)

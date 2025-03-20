@@ -20,13 +20,14 @@ private:
     using Buffer = FixedBuffer<KLargeBuffer>;
     using BufferPtr = std::unique_ptr<Buffer>;
     using BufferVector = std::vector<BufferPtr>;
+    std::string basename_;
     //冲刷间隔时间 默认3s
     const int flush_interval_;
     const off_t roll_size_;
     bool is_running_;
     // Log后端线程
     std::thread log_thread_;
-    std::string basename_;
+    
     std::mutex mutex_;
     std::condition_variable cond_;
     BufferPtr current_buffer_;

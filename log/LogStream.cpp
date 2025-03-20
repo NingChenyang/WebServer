@@ -65,6 +65,12 @@ LogStream &LogStream::operator<<(int v)
     return *this;
 }
 
+LogStream &LogStream::operator<<(size_t v)
+{
+    FormatInteger(v);
+    return *this;
+}
+
 LogStream &LogStream::operator<<(long v)
 {
     // 格式化整型为字符串并输出到缓冲区

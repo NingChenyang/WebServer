@@ -9,6 +9,7 @@
 class Logger
 {
 public:
+    static std::string log_file_basename_;
     enum class LogLevel
     {
         DEBUG, // 调试使用
@@ -54,7 +55,7 @@ private:
     };
 
     Impl impl_;
-    static std::string log_file_basename_;
+    // static std::string log_file_basename_;
 };
 
 // 这里是不同的日志等级就会有对应的输出，有些等级会输出多些字段，有些等级的输出字段会少些

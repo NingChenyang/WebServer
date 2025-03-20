@@ -1,7 +1,11 @@
 ﻿#include "Acceptor.h"
 
 Acceptor::Acceptor(InetAddress &listenaddr, EventLoop *main_loop)
-	: main_loop_(main_loop)
+	: main_loop_(main_loop),
+	  acceptsock_(nullptr),
+	  acceptchannel_(nullptr),
+	  listen_(false),
+	  newConntionCallback_(nullptr)
 {
 	acceptsock_ = new Socket();
 

@@ -10,48 +10,48 @@ template <int SIZE>
 class FixedBuffer
 {
 public:
-    FixedBuffer()
-        : cur_(data_)
+    FixedBuffer() : cur_(data_)
     {
+        memset(data_, 0, SIZE); // 在构造时初始化缓冲区
     }
-    ~FixedBuffer() {}
+
+    ~FixedBuffer() = default;
 
     void Append(const char *buf, size_t len)
     {
-        if (Available() > len)
+        if (!buf || len == 0 || len > SIZE)
+            return;
+        if (Available() >= len)
         {
             memcpy(cur_, buf, len);
-            cur_ += len; // 修改：直接移动指针
+            cur_ += len;
         }
     }
 
     void AppendComplete(size_t len)
     {
-        cur_ += len; // 修改：使用 += 运算符
+        if (len <= Available() && cur_ + len <= End())
+        {
+            cur_ += len;
+        }
     }
 
-    // 清空数据
-    void MenSet()
-    {
-        memset(data_, 0, sizeof(data_)); // 修复：data_ 而不是 data
-    }
-
-    // 重置数据
+    // 修改：移除 ReSet() 函数，使用 ReSet() 替代
     void ReSet()
     {
         cur_ = data_;
+        memset(data_, 0, SIZE);
     }
 
-    // 修复：返回类型声明
+    // 确保返回有效指针
     const char *Data() const
     {
         return data_;
     }
 
-    // 数据长度
-    size_t Length() const
+    int Length() const
     {
-        return static_cast<size_t>(cur_ - data_);
+        return cur_ - data_;
     }
 
     char *Current()
@@ -67,7 +67,7 @@ public:
 private:
     const char *End() const
     {
-        return data_ + SIZE; // 修复：使用 SIZE 而不是 sizeof data_
+        return data_ + SIZE;
     }
 
     char data_[SIZE];

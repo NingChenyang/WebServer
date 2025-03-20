@@ -11,6 +11,9 @@
 #include <unistd.h>  // for read, write, readv
 #include <fcntl.h>   // for open
 #include <sys/uio.h> // for struct iovec
+#include"../log/Logger.h"
+#include"../http/HttpUtil.h"
+
 class Buffer {
 public:
     const size_t InitialSize = 1024;  // 初始缓冲区大小
@@ -27,6 +30,7 @@ public:
 
     // 返回可写空间的起始地址
     char* BeginWrite();
+    const char*BeginWrite() const;
 
     // 返回可写空间的长度
     size_t WritableBytes() const;
@@ -51,9 +55,11 @@ public:
     // 读取数据后移动读指针
     void Retrieve(size_t len);
     void RetrieveAll();
+    void RetrieveUntil(const char* end);
 
-    // 清空缓冲区
-    void Clear();
+        // 清空缓冲区
+        void
+        Clear();
 
     //
     std::string ReadBuffer(size_t len);
@@ -65,6 +71,9 @@ public:
 
     // 将缓冲区数据写入文件描述符
     ssize_t WriteFd(int fd);
+    //查找\r\n
+    const char* FindCRLF() const;
+    // const char* FindCRLF(const char* start) const;
 
 private:
     std::vector<char> Buffer_;  // 数据缓冲区

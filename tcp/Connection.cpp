@@ -4,7 +4,7 @@
 #include "Socket.h"
 // #pragma execution_character_set("utf-8")
 Connection::Connection(EventLoop *loop, int sockfd, const InetAddress &localAddr, const InetAddress &peerAddr)
-	: loop_(loop), state_(StateE::kConnecting), socket_(std::make_unique<Socket>(sockfd)), channel_(std::make_unique<Channel>(sockfd, loop_)), localAddr_(localAddr), peerAddr_(peerAddr)
+	: loop_(loop), state_(StateE::kConnecting), socket_(std::make_unique<Socket>(sockfd)), channel_(std::make_unique<Channel>(sockfd, loop_)), localAddr_(localAddr), peerAddr_(peerAddr), context_() // 初始化context_
 {
 	// 设置好 读，写，关闭连接 的回调函数
 	channel_->SetReadCallback([this]()
@@ -172,22 +172,22 @@ void Connection::ForceClose()
 void Connection::HandleRead()
 {
 	int savedErrno = 0;
-	auto n = input_buffer_.ReadFd(fd(), &savedErrno);
-	std::string msg = input_buffer_.ReadBufferAll();
+	ssize_t n = input_buffer_.ReadFd(fd(), &savedErrno);
+
 	if (n > 0)
 	{
 		last_time_ = TimeStamp::Now();
-		messageCallback_(shared_from_this(), msg); // 这个是用户设置好的函数
+		LOG_INFO << "Read " << n << " bytes from fd " << fd();
+		messageCallback_(shared_from_this(), &input_buffer_);
 	}
 	else if (n == 0)
 	{
-		// 表示客户端关闭了连接
+		LOG_INFO << "Connection closed by peer";
 		HandleClose();
 	}
 	else
 	{
-		// 表示出错了，现在不处理
-		printf("readFd error\n");
+		LOG_ERROR << "ReadFd error: " << strerror(savedErrno);
 	}
 }
 
@@ -264,4 +264,19 @@ void Connection::ShutdownInLoop()
 			}
 		}
 	}
+}
+
+void Connection::SetContext(const std::any &context)
+{
+	context_ = context;
+}
+
+const std::any &Connection::GetContext() const
+{
+	return context_;
+}
+
+std::any &Connection::GetMutableContext()
+{
+	return context_;
 }

@@ -109,7 +109,12 @@
     "semaphore": "cpp",
     "stop_token": "cpp",
     "thread": "cpp",
-    "queue": "cpp"
+    "queue": "cpp",
+    "fstream": "cpp",
+    "any": "cpp",
+    "codecvt": "cpp",
+    "iomanip": "cpp",
+    "sstream": "cpp"
   },
   // "C_Cpp.errorSquiggles": "disabled",
   "C_Cpp_Runner.msvcWarnings": [

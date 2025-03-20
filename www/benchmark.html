@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>性能测试 - 我的Web服务器</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">首页</a></li>
+            <li><a href="about.html">关于</a></li>
+            <li><a href="benchmark.html" class="active">性能测试</a></li>
+            <li><a href="contact.html">联系我们</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h1>性能测试报告</h1>
+
+        <h2>测试环境</h2>
+        <ul>
+            <li>处理器：Intel Core i7-9700K</li>
+            <li>内存：16GB DDR4</li>
+            <li>系统：Ubuntu 20.04 LTS</li>
+            <li>测试工具：Apache Benchmark (ab)</li>
+        </ul>
+
+        <h2>测试结果</h2>
+        <table class="benchmark-table">
+            <tr>
+                <th>并发数</th>
+                <th>总请求数</th>
+                <th>QPS</th>
+                <th>平均响应时间</th>
+            </tr>
+            <tr>
+                <td>100</td>
+                <td>10000</td>
+                <td>12000</td>
+                <td>0.3ms</td>
+            </tr>
+            <tr>
+                <td>1000</td>
+                <td>10000</td>
+                <td>11500</td>
+                <td>0.5ms</td>
+            </tr>
+            <tr>
+                <td>10000</td>
+                <td>100000</td>
+                <td>10800</td>
+                <td>0.8ms</td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>

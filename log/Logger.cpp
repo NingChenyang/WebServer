@@ -12,17 +12,37 @@ Logger::LogLevel InitLogLevel()
         return Logger::LogLevel::INFO;
 }
 // 初始化
-std::string Logger::log_file_basename_ = "./li22";
+// std::string Logger::log_file_basename_ = "../logs/server"; // 修改默认日志路径
 void OnceInit()
 {
-    asyncLogger = std::make_unique<AsyncLogger>(Logger::LogFileName(), 1024 * 1024 * 50);
-    asyncLogger->Start();
+    try
+    {
+        asyncLogger = std::make_unique<AsyncLogger>(Logger::LogFileName(), 1024 * 1024 * 50);
+        asyncLogger->Start();
+    }
+    catch (const std::exception &e)
+    {
+        fprintf(stderr, "Failed to initialize AsyncLogger: %s\n", e.what());
+        exit(1);
+    }
 }
 // 输出到给定的缓冲区中
 void AsyncOutput(const char *logline, int len)
 {
-    std::call_once(g_once_flag, OnceInit);
-    asyncLogger->Append(logline, len);
+    if (logline == nullptr || len <= 0)
+        return;
+    try
+    {
+        std::call_once(g_once_flag, OnceInit);
+        if (asyncLogger)
+        {
+            asyncLogger->Append(logline, len);
+        }
+    }
+    catch (const std::exception &e)
+    {
+        fprintf(stderr, "AsyncOutput failed: %s\n", e.what());
+    }
 }
 void Logger::DefalutOutput(const char *msg, size_t len)
 {
@@ -50,10 +70,9 @@ LogStream &Logger::Stream()
     return impl_.stream_; // TODO: 在此处插入 return 语句
 }
 
-
-//当前线程的时间戳
+// 当前线程的时间戳
 thread_local char t_time[64];
-//当前线程最新日志消息的秒数
+// 当前线程最新日志消息的秒数
 thread_local time_t t_lastSecond;
 
 // helper class for known string length at compile time(编译时间)
@@ -74,13 +93,6 @@ inline LogStream &operator<<(LogStream &s, T v)
     return s;
 }
 
-
-
-
-
-
-
-
 // 日志等级字符串数组
 const char *g_loglevel_name[static_cast<int>(Logger::LogLevel::NUM_LOG_LEVELS)] =
     {
@@ -89,9 +101,6 @@ const char *g_loglevel_name[static_cast<int>(Logger::LogLevel::NUM_LOG_LEVELS)] 
         "WARN  ",
         "ERROR ",
         "FATAL "};
-
-
-
 
 // 多个级别，输出就有对应的输出。
 Logger::Logger(const char *FileName, int line, LogLevel level, const char *funcName)
@@ -165,8 +174,17 @@ void Logger::SetFlush(FlushFunc flush)
 }
 Logger::~Logger()
 {
-    // stream_ << " - " << basename_ << " : " << line_ << '\n';
-    impl_.finish();
-    const LogStream::LogBuffer &buf(Stream().buffer());
-    g_output(buf.Data(), buf.Length());
+    try
+    {
+        impl_.finish();
+        const LogStream::LogBuffer &buf(Stream().buffer());
+        if (g_output && buf.Data() && buf.Length() > 0)
+        {
+            g_output(buf.Data(), buf.Length());
+        }
+    }
+    catch (const std::exception &e)
+    {
+        fprintf(stderr, "Logger destructor failed: %s\n", e.what());
+    }
 }

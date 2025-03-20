@@ -26,7 +26,7 @@ public:
     const std::string &GetQuery() const;
     void SetReceiveTime(TimeStamp t);
     TimeStamp GetReceiveTime() const;
-
+    
 private:
     // 请求方法
     Method method_;

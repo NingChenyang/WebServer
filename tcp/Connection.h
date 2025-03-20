@@ -6,6 +6,7 @@
 #include "Socket.h"
 #include "TimeStamp.h"
 #include <sys/socket.h>
+#include <any>
 class EventLoop;
 class Channel;
 
@@ -73,6 +74,11 @@ public:
 
 	int fd() const { return socket_->fd(); }
 	// void EnableWriting();
+
+	void SetContext(const std::any &context);
+	const std::any &GetContext()const;
+	std::any &GetMutableContext();
+
 private:
 	void HandleRead();
 	void HandleWrite();
@@ -100,4 +106,5 @@ private:
 	Buffer input_buffer_;
 	Buffer output_buffer_;
 	TimeStamp last_time_;
+	std::any context_;
 };

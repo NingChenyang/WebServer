@@ -28,11 +28,12 @@ private:
     // 冲刷的次数限制
     const int flush_everyN_;
     int count_;
-    std::unique_ptr<AppendFile> file_;
+    
     // 日志文件开始写的时间
     time_t start_of_period_;
     // 最新一次的滚动时间
     time_t last_roll_;
+    std::unique_ptr<AppendFile> file_;
     // 一天中的秒数
     const static int kRollPerSeconds_ = 60 * 60 * 24;
 };
