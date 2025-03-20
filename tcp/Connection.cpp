@@ -236,13 +236,14 @@ void Connection::HandleClose()
 	{
 		SetState(StateE::kDisconnected);
 		channel_->DisableAll();
+	}
 		ConnectionPtr guardThis(shared_from_this());
 		// printf("Connection::handleClose() guardThis(shared_from_this())后 user_count= %ld\n", guardThis.use_count());
 		if (closedCallback_)
 		{
 			closedCallback_(guardThis);
 		}
-	}
+	
 	loop_->RemoveLoopConn(fd());
 	// closeCallback_就是Server::removeConnection()函数
 }

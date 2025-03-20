@@ -55,10 +55,11 @@ int main()
         // 修改监听地址为0.0.0.0，接受所有网卡的连接
         InetAddress listenAddr("0.0.0.0", 8888);
 
-        HttpServer server(listenAddr, 4, 4);
+        HttpServer server(listenAddr, 5, 5);
         server.SetHttpCallback(onRequest);
 
         std::cout << "HTTP server starting on http://0.0.0.0:8888" << std::endl;
+       
         server.Start();
     }
     catch (const std::exception &e)
