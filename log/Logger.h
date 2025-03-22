@@ -1,11 +1,12 @@
 #pragma once
-#include"LogStream.h"
+#include "LogStream.h"
 #include "../tcp/TimeStamp.h"
 #include "../tcp/CurrentThread.h"
-#include"AsyncLogger.h"
+#include "AsyncLogger.h"
 #include <memory>
 #include <assert.h>
-#include<mutex>
+#include <mutex>
+#include <sys/time.h>
 class Logger
 {
 public:
@@ -27,7 +28,7 @@ public:
     // 获取全局日志等级，并非当前对象的等级
     static LogLevel GlobalLogLevel();
     LogStream &Stream();
-    void DefalutOutput(const char*msg,size_t len);
+    void DefalutOutput(const char *msg, size_t len);
 
     static std::string LogFileName() { return log_file_basename_; }
 

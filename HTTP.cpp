@@ -8,6 +8,21 @@
 
 extern const std::string ROOT_DIR = ".";                   // 定义网站根目录
 std::string Logger::log_file_basename_ = "../logs/server"; // 修改默认日志路径
+
+// 全局指针,用于信号处理函数访问
+HttpServer *g_server = nullptr;
+
+// 信号处理函数
+void SignalHandler(int sig)
+{
+    LOG_INFO << "Received signal " << sig << ", stopping server...";
+    if (g_server)
+    {
+        g_server->Stop();
+    }
+    exit(0);
+}
+
 void onRequest(const HttpRequest &req, HttpResponse *resp)
 {
     std::string path = req.GetPath();
@@ -50,8 +65,15 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
 
 int main()
 {
-    // 忽略 SIGPIPE 信号
-    // signal(SIGPIPE, SIG_IGN);
+    // 忽略SIGPIPE信号
+    signal(SIGPIPE, SIG_IGN);
+
+    // 注册SIGINT和SIGTERM的处理函数
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = SignalHandler;
+    sigaction(SIGINT, &sa, NULL);  // Ctrl+C
+    sigaction(SIGTERM, &sa, NULL); // kill
 
     std::filesystem::current_path("./www");
 
@@ -61,9 +83,12 @@ int main()
         InetAddress listenAddr("0.0.0.0", 8888);
 
         HttpServer server(listenAddr, 3, 3);
+        g_server = &server; // 设置全局指针
+
         server.SetHttpCallback(onRequest);
 
         std::cout << "HTTP server starting on http://0.0.0.0:8888" << std::endl;
+        std::cout << "Press Ctrl+C to stop" << std::endl;
 
         server.Start();
     }

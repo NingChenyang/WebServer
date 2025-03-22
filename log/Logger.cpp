@@ -133,28 +133,25 @@ Logger::Impl::Impl(LogLevel level, const std::string &file, int line)
 
 void Logger::Impl::formatTime()
 {
-    int64_t microSecondsSinceEpoch = time_.TimeToInt();
-    // 得到秒数
-    time_t seconds = static_cast<time_t>(microSecondsSinceEpoch / TimeStamp::kMicroSecondsPerSecond);
-    // 得到其微妙
-    int microseconds = static_cast<time_t>(microSecondsSinceEpoch % TimeStamp::kMicroSecondsPerSecond);
-    if (seconds != t_lastSecond)
-    { // 秒数不相等，说明也要格式化秒数
-        t_lastSecond = seconds;
-        // struct tm tm_time;
-        // gmtime_r(&seconds, &tm_time);//这是转换为格林尼治标准时间，和北京时间不一样
-        struct tm tm_time;
-        memset(&tm_time, 0, sizeof(tm_time));
-        localtime_r(&seconds, &tm_time);
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    time_t seconds = tv.tv_sec;
+    struct tm tm_time;
+    localtime_r(&seconds, &tm_time);
 
-        int len = snprintf(t_time, sizeof(t_time), "%4d%02d%02d %02d:%02d:%02d",
-                           tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
-                           tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec);
-        assert(len == 17);
-    }
-    char buf[12] = {0};
-    int lenMicro = sprintf(buf, ".%06d ", microseconds);
-    stream_ << T(t_time, 17) << T(buf, lenMicro);
+    // 格式化年月日时分秒
+    char t_time[32];
+    int len = snprintf(t_time, sizeof(t_time), "%4d%02d%02d %02d:%02d:%02d",
+                       tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
+                       tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec);
+    assert(len == 17);
+
+    // 添加微秒
+    char micro[12];
+    int microseconds = tv.tv_usec;
+    int lenMicro = snprintf(micro, sizeof(micro), ".%06d ", microseconds);
+
+    stream_ << T(t_time, 17) << T(micro, lenMicro);
 }
 
 void Logger::Impl::finish()

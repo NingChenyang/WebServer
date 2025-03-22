@@ -14,6 +14,7 @@ public:
     HttpServer(InetAddress &listenAddr, int numThreads, int worker_nums);
     ~HttpServer();
     void Start();
+    void Stop();
     void SetHttpCallback(const HttpCallback &cb);
     // 无用
     EventLoop *GetLoop();
@@ -25,6 +26,7 @@ private:
     // void OnMessage(const ConnectionPtr &conn, Buffer *buf, TimeStamp receiveTime);
     void OnRequest(const ConnectionPtr &conn, const HttpRequest &req);
     void HandleOnWriteComplete(const ConnectionPtr &conn);
+    void HandleOnClosed(const ConnectionPtr &conn);
     Server server_;
     ThreadPool workers_pool_;
     HttpCallback http_callback_;

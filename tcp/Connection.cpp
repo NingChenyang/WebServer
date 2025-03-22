@@ -145,6 +145,7 @@ void Connection::ConnectDestroyed()
 		// 调用用户设置的连接成功或断开的回调函数
 		// std::cout << "断开连接" << std::endl;
 		closedCallback_(shared_from_this());
+
 	}
 	channel_->Remove();
 }
@@ -156,7 +157,7 @@ bool Connection::Timeout(time_t now, int val)
 
 void Connection::ShutDown()
 {
-	
+
 	if (state_ == StateE::kConnected)
 	{
 		SetState(StateE::kDisconnecting);
@@ -192,7 +193,6 @@ void Connection::HandleRead()
 	}
 	else if (n == 0)
 	{
-		LOG_INFO << "Connection closed by peer";
 		HandleClose();
 	}
 	else
@@ -249,14 +249,18 @@ void Connection::HandleClose()
 		SetState(StateE::kDisconnected);
 		channel_->DisableAll();
 	}
-	ConnectionPtr guardThis(shared_from_this());
+	// ConnectionPtr guardThis(shared_from_this());
 	// printf("Connection::handleClose() guardThis(shared_from_this())后 user_count= %ld\n", guardThis.use_count());
 	if (closedCallback_)
 	{
-		closedCallback_(guardThis);
+		closedCallback_(shared_from_this());
 	}
-
+	if(closeCallback_)
+	{
+		closeCallback_(shared_from_this());
+	}
 	loop_->RemoveLoopConn(fd());
+	std::cout<<peerAddress().ToIpPort()<<"断开连接"<<std::endl;
 	// closeCallback_就是Server::removeConnection()函数
 }
 

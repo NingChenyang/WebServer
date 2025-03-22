@@ -110,4 +110,9 @@ void Server::HandleRemoveConntion(const ConnectionPtr &conn)
 	auto n = connections_.erase(conn->fd());
 	assert(n == 1);
 	conn->ConnectDestroyed();
+
+	for(auto &a:connections_)
+	{
+		std::cout<<"server_conns " << a.first<<std::endl;
+	}
 }

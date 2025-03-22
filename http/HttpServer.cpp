@@ -17,6 +17,7 @@ HttpServer::HttpServer(InetAddress &listenAddr, int numThreads, int worker_nums)
     server_.SetOnConnectedCallback(std::bind(&HttpServer::HandleOnConnection, this, std::placeholders::_1));
     server_.SetOnMessageCallback(std::bind(&HttpServer::HandleOnMessage, this, std::placeholders::_1, std::placeholders::_2));
     server_.SetOnSentCallback(std::bind(&HttpServer::HandleOnWriteComplete, this, std::placeholders::_1));
+    server_.SetOnClosedCallback(std::bind(&HttpServer::HandleOnClosed, this, std::placeholders::_1));
 }
 
 HttpServer::~HttpServer()
@@ -26,6 +27,17 @@ HttpServer::~HttpServer()
 void HttpServer::Start()
 {
     server_.Run();
+}
+
+void HttpServer::Stop()
+{
+    // 先停止工作线程池
+    workers_pool_.Stop();
+    LOG_INFO << "Worker threads stopped";
+
+    // 然后停止服务器(包括IO线程池和事件循环)
+    server_.Stop();
+    LOG_INFO << "HTTP Server stopped";
 }
 
 void HttpServer::SetHttpCallback(const HttpCallback &cb)
@@ -42,7 +54,7 @@ void HttpServer::HandleOnConnection(const ConnectionPtr &conn)
 {
     if (conn->Connected())
     {
-        LOG_INFO << "New connection established";
+        LOG_INFO << "New connection established"<<conn->fd()<<":"<<conn->peerAddress().ToIpPort();
         try
         {
             conn->SetContext(HttpContext());
@@ -67,17 +79,12 @@ void HttpServer::OnMessage(const ConnectionPtr &conn, Buffer *buf)
     try
     {
         size_t size = buf->ReadableBytes();
-        LOG_INFO << "Received message from " << conn->peerAddress().ToIpPort()
-                 << ", size=" << size;
 
         if (size == 0)
         {
             LOG_WARN << "Empty message received, ignoring";
             return;
         }
-
-        LOG_INFO << "Raw message:\n"
-                 << std::string(buf->Peek(), size);
 
         LOG_INFO << "Received message, size=" << (int)(buf->ReadableBytes());
         LOG_INFO << "Message content: \n"
@@ -98,9 +105,8 @@ void HttpServer::OnMessage(const ConnectionPtr &conn, Buffer *buf)
         {
             LOG_INFO << "Got complete request, path=" << context->GetRequest().GetPath();
             // 将请求处理放入线程池
-            workers_pool_.AddTask([this, conn, req = context->GetRequest()]() {
-                OnRequest(conn, req);
-            });
+            workers_pool_.AddTask([this, conn, req = context->GetRequest()]()
+                                  { OnRequest(conn, req); });
             context->Reset();
         }
     }
@@ -171,4 +177,9 @@ void HttpServer::HandleOnWriteComplete(const ConnectionPtr &conn)
 {
     // 这里可以进行一些清理工作
     LOG_INFO << conn->peerAddress().ToIpPort() << " write complete";
+}
+
+void HttpServer::HandleOnClosed(const ConnectionPtr &conn)
+{
+    LOG_INFO << conn->peerAddress().ToIpPort() << " closed";
 }
