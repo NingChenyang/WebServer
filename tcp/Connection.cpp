@@ -22,7 +22,11 @@ Connection::Connection(EventLoop *loop, int sockfd, const InetAddress &localAddr
 
 Connection::~Connection()
 {
-	// std::cout << "connection 析构" << std::endl;
+	// 确保连接被正确关闭
+	if (state_ != StateE::kDisconnected)
+	{
+		HandleClose();
+	}
 }
 
 void Connection::SetOnMessageCallback(const OnMessageCallback &cb)
