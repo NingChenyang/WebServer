@@ -27,3 +27,5 @@ $(HTTP_TARGET): $(ALL_SRCS)
 .PHONY: clean
 clean:
 	rm -f $(HTTP_TARGET)
+clean_log:
+	rm -f logs/*.log

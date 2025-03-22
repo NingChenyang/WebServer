@@ -7,6 +7,7 @@
 #include "TimeStamp.h"
 #include <sys/socket.h>
 #include <any>
+#include <mutex>
 class EventLoop;
 class Channel;
 
@@ -76,8 +77,10 @@ public:
 	// void EnableWriting();
 
 	void SetContext(const std::any &context);
-	const std::any &GetContext()const;
+	const std::any &GetContext() const;
 	std::any &GetMutableContext();
+
+	std::mutex &GetMutex() { return mutex_; }
 
 private:
 	void HandleRead();
@@ -107,4 +110,5 @@ private:
 	Buffer output_buffer_;
 	TimeStamp last_time_;
 	std::any context_;
+	std::mutex mutex_; // 保护Connection对象的访问
 };

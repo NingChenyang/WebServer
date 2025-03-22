@@ -4,6 +4,8 @@
 #include "http/HttpUtil.h"
 #include <iostream>
 #include <filesystem>
+#include <signal.h>
+
 extern const std::string ROOT_DIR = ".";                   // 定义网站根目录
 std::string Logger::log_file_basename_ = "../logs/server"; // 修改默认日志路径
 void onRequest(const HttpRequest &req, HttpResponse *resp)
@@ -48,6 +50,9 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
 
 int main()
 {
+    // 忽略 SIGPIPE 信号
+    // signal(SIGPIPE, SIG_IGN);
+
     std::filesystem::current_path("./www");
 
     try
@@ -59,7 +64,7 @@ int main()
         server.SetHttpCallback(onRequest);
 
         std::cout << "HTTP server starting on http://0.0.0.0:8888" << std::endl;
-       
+
         server.Start();
     }
     catch (const std::exception &e)

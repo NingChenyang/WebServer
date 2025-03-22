@@ -57,6 +57,12 @@ void HttpServer::HandleOnConnection(const ConnectionPtr &conn)
 
 void HttpServer::HandleOnMessage(const ConnectionPtr &conn, Buffer *buf)
 {
+
+    OnMessage(conn, buf);
+}
+
+void HttpServer::OnMessage(const ConnectionPtr &conn, Buffer *buf)
+{
     HttpContext *context = nullptr;
     try
     {
@@ -123,6 +129,12 @@ void HttpServer::HandleOnMessage(const ConnectionPtr &conn, Buffer *buf)
 
 void HttpServer::OnRequest(const ConnectionPtr &conn, const HttpRequest &req)
 {
+    if (!conn || !conn->Connected())
+    {
+        LOG_WARN << "Connection already closed, skip sending response";
+        return;
+    }
+
     const std::string &connection = req.GetHeader("Connection");
     bool close = connection == "close" || (req.GetVersion() == Version::kHttp10 && connection != "Keep-Alive");
 
@@ -135,7 +147,15 @@ void HttpServer::OnRequest(const ConnectionPtr &conn, const HttpRequest &req)
     LOG_INFO << "Response content: \n"
              << std::string(buf.Peek(), buf.ReadableBytes());
 
-    conn->Send(&buf);
+    // 发送前再次检查连接状态
+    if (conn->Connected())
+    {
+        conn->Send(&buf);
+    }
+    else
+    {
+        LOG_WARN << "Connection closed before sending response";
+    }
 
     if (resp.GetCloseConnection())
     {

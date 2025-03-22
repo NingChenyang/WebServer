@@ -107,7 +107,9 @@ void Connection::SendInLoop(const void *message, size_t len)
 				if (errno == EPIPE || errno == ECONNRESET)
 				{
 					fault_error = true;
+					HandleError();
 				}
+				return;
 			}
 		}
 	}
@@ -195,6 +197,7 @@ void Connection::HandleRead()
 	else
 	{
 		LOG_ERROR << "ReadFd error: " << strerror(savedErrno);
+		HandleError(); // 添加错误处理调用
 	}
 }
 
@@ -205,7 +208,7 @@ void Connection::HandleWrite()
 		return;
 	}
 
-	size_t n = ::write(fd(), output_buffer_.Peek(), output_buffer_.ReadableBytes());
+	ssize_t n = ::write(fd(), output_buffer_.Peek(), output_buffer_.ReadableBytes());
 	if (n > 0)
 	{
 		output_buffer_.Retrieve(n);
@@ -229,7 +232,11 @@ void Connection::HandleWrite()
 	{
 		if (errno != EWOULDBLOCK && errno != EAGAIN)
 		{
-			HandleError();
+			LOG_ERROR << "HandleWrite error: " << strerror(errno);
+			if (errno == EPIPE || errno == ECONNRESET)
+			{
+				HandleError();
+			}
 		}
 	}
 }
@@ -241,19 +248,43 @@ void Connection::HandleClose()
 		SetState(StateE::kDisconnected);
 		channel_->DisableAll();
 	}
-		ConnectionPtr guardThis(shared_from_this());
-		// printf("Connection::handleClose() guardThis(shared_from_this())后 user_count= %ld\n", guardThis.use_count());
-		if (closedCallback_)
-		{
-			closedCallback_(guardThis);
-		}
-	
+	ConnectionPtr guardThis(shared_from_this());
+	// printf("Connection::handleClose() guardThis(shared_from_this())后 user_count= %ld\n", guardThis.use_count());
+	if (closedCallback_)
+	{
+		closedCallback_(guardThis);
+	}
+
 	loop_->RemoveLoopConn(fd());
 	// closeCallback_就是Server::removeConnection()函数
 }
 
 void Connection::HandleError()
 {
+	int err = sockets::GetSocketError(fd());
+	int cur_errno = errno; // 保存当前的 errno
+
+	std::string errorMsg;
+	if (err != 0)
+	{
+		errorMsg = strerror(err);
+	}
+	else if (cur_errno != 0)
+	{
+		errorMsg = strerror(cur_errno);
+	}
+	else
+	{
+		errorMsg = "Connection reset by peer or timeout";
+	}
+
+	LOG_ERROR << "Connection::HandleError [" << peerAddr_.ToIpPort()
+			  << "] - errno = " << cur_errno
+			  << ", SO_ERROR = " << err
+			  << " (" << errorMsg << ")";
+
+	// 发生错误时强制关闭连接
+	ForceClose();
 }
 
 // 新增函数，用于在IO线程中安全关闭连接

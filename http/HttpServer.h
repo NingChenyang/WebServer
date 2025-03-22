@@ -21,6 +21,7 @@ public:
 private:
     void HandleOnConnection(const ConnectionPtr &conn);
     void HandleOnMessage(const ConnectionPtr &conn, Buffer *buf);
+    void OnMessage(const ConnectionPtr &conn, Buffer *buf);
     // void OnMessage(const ConnectionPtr &conn, Buffer *buf, TimeStamp receiveTime);
     void OnRequest(const ConnectionPtr &conn, const HttpRequest &req);
     void HandleOnWriteComplete(const ConnectionPtr &conn);
