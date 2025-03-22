@@ -156,6 +156,7 @@ bool Connection::Timeout(time_t now, int val)
 
 void Connection::ShutDown()
 {
+	
 	if (state_ == StateE::kConnected)
 	{
 		SetState(StateE::kDisconnecting);

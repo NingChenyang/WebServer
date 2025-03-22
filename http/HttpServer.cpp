@@ -90,14 +90,17 @@ void HttpServer::OnMessage(const ConnectionPtr &conn, Buffer *buf)
         {
             LOG_ERROR << "Failed to parse request";
             conn->Send("HTTP/1.1 400 Bad Request\r\n\r\n");
-            conn->ShutDown();
+            conn->ShutdownInLoop();
             return;
         }
 
         if (context->GotAll())
         {
             LOG_INFO << "Got complete request, path=" << context->GetRequest().GetPath();
-            OnRequest(conn, context->GetRequest());
+            // 将请求处理放入线程池
+            workers_pool_.AddTask([this, conn, req = context->GetRequest()]() {
+                OnRequest(conn, req);
+            });
             context->Reset();
         }
     }
@@ -114,7 +117,7 @@ void HttpServer::OnMessage(const ConnectionPtr &conn, Buffer *buf)
             if (!context->ParseRequest(buf))
             {
                 conn->Send("HTTP/1.1 400 Bad Request\r\n\r\n");
-                conn->ShutDown();
+                conn->ShutdownInLoop();
                 return;
             }
         }
@@ -122,7 +125,7 @@ void HttpServer::OnMessage(const ConnectionPtr &conn, Buffer *buf)
         {
             LOG_ERROR << "Failed to create context: " << e.what();
             conn->Send("HTTP/1.1 500 Internal Server Error\r\n\r\n");
-            conn->ShutDown();
+            conn->ShutdownInLoop();
         }
     }
 }
@@ -159,8 +162,8 @@ void HttpServer::OnRequest(const ConnectionPtr &conn, const HttpRequest &req)
 
     if (resp.GetCloseConnection())
     {
-        LOG_INFO << "Closing connection after response";
-        conn->ShutDown();
+
+        conn->ShutdownInLoop();
     }
 }
 
