@@ -38,10 +38,6 @@ void EventLoop::RemoveLoopConn(int fd)
 {
 	std::lock_guard<std::mutex> lock(cmutex_);
 	loop_conns_.erase(fd);
-	for (auto&a:loop_conns_)
-	{
-		std::cout<< "loop_conns "<< a.first<<std::endl;
-	}
 	
 }
 void EventLoop::SetRemoveLoopConnCallback(RemoveLoopConnCallback fn)

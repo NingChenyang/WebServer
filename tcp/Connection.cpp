@@ -23,6 +23,7 @@ Connection::Connection(EventLoop *loop, int sockfd, const InetAddress &localAddr
 Connection::~Connection()
 {
 	// 确保连接被正确关闭
+	std::cout << "conn" << fd() << "析构" << std::endl;
 	if (state_ != StateE::kDisconnected)
 	{
 		HandleClose();
@@ -138,16 +139,14 @@ void Connection::ConnectEstablished()
 
 void Connection::ConnectDestroyed()
 {
-	if (state_ == StateE::kConnected)
+	if (state_ == StateE::kConnected|| state_ == StateE::kDisconnecting)
 	{
 		SetState(StateE::kDisconnected);
 		channel_->DisableAll();
 		// 调用用户设置的连接成功或断开的回调函数
 		// std::cout << "断开连接" << std::endl;
-		closedCallback_(shared_from_this());
-
+		channel_->Remove();
 	}
-	channel_->Remove();
 }
 
 bool Connection::Timeout(time_t now, int val)
@@ -244,23 +243,15 @@ void Connection::HandleWrite()
 
 void Connection::HandleClose()
 {
-	if (state_ == StateE::kConnected || state_ == StateE::kDisconnecting)
-	{
-		SetState(StateE::kDisconnected);
-		channel_->DisableAll();
-	}
-	// ConnectionPtr guardThis(shared_from_this());
-	// printf("Connection::handleClose() guardThis(shared_from_this())后 user_count= %ld\n", guardThis.use_count());
 	if (closedCallback_)
 	{
 		closedCallback_(shared_from_this());
 	}
-	if(closeCallback_)
+	if (RemoveLoopConnCallback_)
 	{
-		closeCallback_(shared_from_this());
+		RemoveLoopConnCallback_(shared_from_this());
 	}
 	loop_->RemoveLoopConn(fd());
-	std::cout<<peerAddress().ToIpPort()<<"断开连接"<<std::endl;
 	// closeCallback_就是Server::removeConnection()函数
 }
 

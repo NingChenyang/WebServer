@@ -34,9 +34,9 @@ public:
 	void SetOnSentCallback(const OnSentCallback &cb);
 	void SetOnConnectedCallback(const OnConnectedCallback &cb);
 
-	void SetCloseCallback(const CloseCallback &cb)
+	void SetRemoveConnCallback(const RemoveConnCallback &cb)
 	{
-		closeCallback_ = cb;
+		RemoveLoopConnCallback_ = cb;
 	}
 
 	bool Connected() const { return state_ == StateE::kConnected; }
@@ -99,7 +99,7 @@ private:
 	const InetAddress localAddr_;
 	const InetAddress peerAddr_;
 
-	CloseCallback closeCallback_;
+	RemoveConnCallback RemoveLoopConnCallback_;
 
 	OnMessageCallback messageCallback_;
 	OnClosedCallback closedCallback_;

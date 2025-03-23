@@ -100,8 +100,8 @@ void Server::HandleNewConntion(int cfd, const InetAddress &peerAddr)
 		conn->SetOnSentCallback(sentCallback_);
 	}
 
-	conn->SetCloseCallback([this](const ConnectionPtr &conn)
-						   { HandleRemoveConntion(conn); });
+	conn->SetRemoveConnCallback([this](const ConnectionPtr &conn)
+								{ HandleRemoveConntion(conn); });
 	conn->ConnectEstablished();
 }
 
@@ -110,9 +110,4 @@ void Server::HandleRemoveConntion(const ConnectionPtr &conn)
 	auto n = connections_.erase(conn->fd());
 	assert(n == 1);
 	conn->ConnectDestroyed();
-
-	for(auto &a:connections_)
-	{
-		std::cout<<"server_conns " << a.first<<std::endl;
-	}
 }

@@ -141,11 +141,13 @@ void Channel::HandleEventWithGuard()
 {
 	if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN))
 	{ // 当事件为挂起并没有可读事件时
+		revents_ &= ~EPOLLHUP;
 		if (closeCallback_)
 			closeCallback_();
 	}
 	if (revents_ & EPOLLERR)
 	{
+		revents_ &= ~EPOLLERR;
 		if (errorCallback_)
 			errorCallback_();
 	}
@@ -153,14 +155,15 @@ void Channel::HandleEventWithGuard()
 	{ // 关于读的事件
 		if (readCallback_)
 		{
-			revents_ |= ~EPOLLIN;
-			revents_ |= ~EPOLLPRI;
-			revents_ |= ~EPOLLRDHUP;
+			revents_ &= ~EPOLLIN;
+			revents_ &= ~EPOLLPRI;
+			revents_ &= ~EPOLLRDHUP;
 			readCallback_();
 		}
 	}
 	if (revents_ & EPOLLOUT)
 	{ // 关于写的事件
+		revents_ &= ~EPOLLOUT;
 		if (writeCallback_)
 			writeCallback_();
 	}

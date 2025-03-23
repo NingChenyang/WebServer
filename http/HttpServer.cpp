@@ -68,9 +68,70 @@ void HttpServer::HandleOnConnection(const ConnectionPtr &conn)
 }
 
 void HttpServer::HandleOnMessage(const ConnectionPtr &conn, Buffer *buf)
-{
 
-    OnMessage(conn, buf);
+{
+    HttpContext *context = nullptr;
+    try
+    {
+        size_t size = buf->ReadableBytes();
+        LOG_INFO << "Received message from " << conn->peerAddress().ToIpPort()
+                 << ", size=" << size;
+
+        if (size == 0)
+        {
+            LOG_WARN << "Empty message received, ignoring";
+            return;
+        }
+
+        LOG_INFO << "Raw message:\n"
+                 << std::string(buf->Peek(), size);
+
+        LOG_INFO << "Received message, size=" << (int)(buf->ReadableBytes());
+        LOG_INFO << "Message content: \n"
+                 << std::string(buf->Peek(), buf->ReadableBytes());
+
+        auto &ctx = std::any_cast<HttpContext &>(conn->GetMutableContext());
+        context = &ctx;
+
+        if (!context->ParseRequest(buf))
+        {
+            LOG_ERROR << "Failed to parse request";
+            conn->Send("HTTP/1.1 400 Bad Request\r\n\r\n");
+            conn->ShutDown();
+            return;
+        }
+
+        if (context->GotAll())
+        {
+            LOG_INFO << "Got complete request, path=" << context->GetRequest().GetPath();
+            OnRequest(conn, context->GetRequest());
+            context->Reset();
+        }
+    }
+    catch (const std::bad_any_cast &e)
+    {
+        LOG_ERROR << "Context cast failed: " << e.what();
+        try
+        {
+            conn->SetContext(HttpContext());
+            auto &ctx = std::any_cast<HttpContext &>(conn->GetMutableContext());
+            context = &ctx;
+
+            // 重试解析请求
+            if (!context->ParseRequest(buf))
+            {
+                conn->Send("HTTP/1.1 400 Bad Request\r\n\r\n");
+                conn->ShutDown();
+                return;
+            }
+        }
+        catch (const std::exception &e)
+        {
+            LOG_ERROR << "Failed to create context: " << e.what();
+            conn->Send("HTTP/1.1 500 Internal Server Error\r\n\r\n");
+            conn->ShutDown();
+        }
+    }
 }
 
 void HttpServer::OnMessage(const ConnectionPtr &conn, Buffer *buf)
@@ -182,4 +243,5 @@ void HttpServer::HandleOnWriteComplete(const ConnectionPtr &conn)
 void HttpServer::HandleOnClosed(const ConnectionPtr &conn)
 {
     LOG_INFO << conn->peerAddress().ToIpPort() << " closed";
+    std::cout << conn->peerAddress().ToIpPort() << "断开连接" << std::endl;
 }
