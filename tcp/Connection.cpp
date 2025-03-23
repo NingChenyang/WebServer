@@ -23,7 +23,7 @@ Connection::Connection(EventLoop *loop, int sockfd, const InetAddress &localAddr
 Connection::~Connection()
 {
 	// 确保连接被正确关闭
-	std::cout << "conn" << fd() << "析构" << std::endl;
+	// std::cout << "conn" << fd() << "析构" << std::endl;
 	if (state_ != StateE::kDisconnected)
 	{
 		HandleClose();
@@ -128,10 +128,12 @@ void Connection::SendInLoop(const void *message, size_t len)
 
 void Connection::ConnectEstablished()
 {
+
 	assert(state_ == StateE::kConnecting);
 	SetState(StateE::kConnected);
 	channel_->Tie(shared_from_this());
 	channel_->EnableReading();
+	last_time_ = TimeStamp::Now();
 	// 连接成功后业务处理
 	// std::cout << "成功连接" << std::endl;
 	connectedCallback_(shared_from_this());
@@ -184,7 +186,7 @@ void Connection::HandleRead()
 	if (n > 0)
 	{
 		last_time_ = TimeStamp::Now();
-		LOG_INFO << "Read " << n << " bytes from fd " << fd();
+		// LOG_INFO << "Read " << n << " bytes from fd " << fd();
 		if (messageCallback_)
 		{
 			messageCallback_(shared_from_this(), &input_buffer_);
@@ -211,6 +213,7 @@ void Connection::HandleWrite()
 	ssize_t n = ::write(fd(), output_buffer_.Peek(), output_buffer_.ReadableBytes());
 	if (n > 0)
 	{
+		last_time_ = TimeStamp::Now();
 		output_buffer_.Retrieve(n);
 		// 如果发送缓冲区清空，关闭写事件并触发回调
 		if (output_buffer_.ReadableBytes() == 0)

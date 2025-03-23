@@ -7,14 +7,14 @@ void SetNonblock(int sockfd)
 }
 
 Server::Server(InetAddress &serv_addr, int thread_nums)
-	: main_loop_(new EventLoop(true, 600000, 100000)), thread_nums_(thread_nums), io_pool_(new ThreadPool(thread_nums_, "IO")), acceptor_(std::make_unique<Acceptor>(serv_addr, main_loop_))
+	: main_loop_(new EventLoop(true, 300, 600)), thread_nums_(thread_nums), io_pool_(new ThreadPool(thread_nums_, "IO")), acceptor_(std::make_unique<Acceptor>(serv_addr, main_loop_))
 {
 	auto cb = [this](int sockfd, const InetAddress &peerAddr)
 	{ HandleNewConntion(sockfd, peerAddr); };
 	acceptor_->SetNewConntionCallback(cb);
 	for (int i = 0; i < thread_nums_; i++)
 	{
-		sub_loop_.emplace_back(new EventLoop(false, 600000, 100000));
+		sub_loop_.emplace_back(new EventLoop(false, 60, 120));
 		sub_loop_[i]->SetRemoveLoopConnCallback(std::bind(&Server::HandleRemoveConntion, this, std::placeholders::_1));
 
 		io_pool_->AddTask(std::bind(&EventLoop::Run, sub_loop_[i].get()));
@@ -107,7 +107,14 @@ void Server::HandleNewConntion(int cfd, const InetAddress &peerAddr)
 
 void Server::HandleRemoveConntion(const ConnectionPtr &conn)
 {
-	auto n = connections_.erase(conn->fd());
-	assert(n == 1);
+	{
+		std::lock_guard<std::mutex> lock(mutex_);
+		auto it = connections_.find(conn->fd());
+		if (it != connections_.end())
+		{
+			connections_.erase(it);
+		}
+	}
+	if(conn)
 	conn->ConnectDestroyed();
 }

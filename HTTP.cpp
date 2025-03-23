@@ -15,7 +15,7 @@ HttpServer *g_server = nullptr;
 // 信号处理函数
 void SignalHandler(int sig)
 {
-    LOG_INFO << "Received signal " << sig << ", stopping server...";
+    // LOG_INFO << "Received signal " << sig << ", stopping server...";
     if (g_server)
     {
         g_server->Stop();
@@ -26,7 +26,7 @@ void SignalHandler(int sig)
 void onRequest(const HttpRequest &req, HttpResponse *resp)
 {
     std::string path = req.GetPath();
-    LOG_INFO << "Handling request for path: " << path;
+    // LOG_INFO << "Handling request for path: " << path;
 
     if (path == "/")
     {
@@ -34,7 +34,7 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
     }
 
     std::string filepath = ROOT_DIR + path;
-    LOG_INFO << "Full filepath: " << filepath;
+    // LOG_INFO << "Full filepath: " << filepath;
 
     std::string content = ReadFile(filepath);
     if (content.empty())
@@ -47,7 +47,7 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
     }
     else
     {
-        LOG_INFO << "File found, size=" << (int)content.size();
+        // LOG_INFO << "File found, size=" << (int)content.size();
         resp->SetStatusCode(HttpStatusCode::k200Ok);
         resp->SetStatusMessage("OK");
         resp->SetContentType(GetFileType(filepath));
@@ -66,7 +66,7 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
 int main()
 {
     // 忽略SIGPIPE信号
-    signal(SIGPIPE, SIG_IGN);
+    // signal(SIGPIPE, SIG_IGN);
 
     // 注册SIGINT和SIGTERM的处理函数
     struct sigaction sa;

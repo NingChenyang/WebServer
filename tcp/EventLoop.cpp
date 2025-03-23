@@ -28,10 +28,10 @@ void EventLoop::NewLoopConntion(ConnectionPtr conn)
 {
 	std::lock_guard<std::mutex> gd(cmutex_);
 	loop_conns_[conn->fd()] = conn;
-	for (auto &a : loop_conns_)
-	{
-		std::cout << "loop_conns " << a.first << std::endl;
-	}
+	// for (auto &a : loop_conns_)
+	// {
+	// 	std::cout << "loop_conns " << a.first << std::endl;
+	// }
 }
 
 void EventLoop::RemoveLoopConn(int fd)
@@ -87,6 +87,8 @@ EventLoop::EventLoop(bool is_main_loop, int time_tvl, int time_out)
 
 	wake_channel_->SetReadCallback(std::bind(&EventLoop::HandleWakeUp, this));
 	wake_channel_->EnableReading();
+	timer_channel_->SetReadCallback(std::bind(&EventLoop::HandleTimer, this));
+	timer_channel_->EnableReading();
 	if (is_main_loop)
 	{
 		// 可以添加主事件循环特有的初始化

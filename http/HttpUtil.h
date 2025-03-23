@@ -102,8 +102,9 @@ const inline std::string GetFileExtension(const std::string &filename)
         // 读取整个文件
         if (!file.read(content.data(), size))
         {
+            file.close();
             return "";
         }
-
+        file.close();
         return content;
     }

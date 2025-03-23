@@ -54,11 +54,11 @@ void HttpServer::HandleOnConnection(const ConnectionPtr &conn)
 {
     if (conn->Connected())
     {
-        LOG_INFO << "New connection established"<<conn->fd()<<":"<<conn->peerAddress().ToIpPort();
+        LOG_INFO << "New connection established "<<conn->fd()<<":"<<conn->peerAddress().ToIpPort();
         try
         {
             conn->SetContext(HttpContext());
-            LOG_INFO << "HttpContext created successfully";
+            // LOG_INFO << "HttpContext created successfully";
         }
         catch (const std::exception &e)
         {
@@ -74,8 +74,8 @@ void HttpServer::HandleOnMessage(const ConnectionPtr &conn, Buffer *buf)
     try
     {
         size_t size = buf->ReadableBytes();
-        LOG_INFO << "Received message from " << conn->peerAddress().ToIpPort()
-                 << ", size=" << size;
+        // LOG_INFO << "Received message from " << conn->peerAddress().ToIpPort()
+                //  << ", size=" << size;
 
         if (size == 0)
         {
@@ -83,12 +83,12 @@ void HttpServer::HandleOnMessage(const ConnectionPtr &conn, Buffer *buf)
             return;
         }
 
-        LOG_INFO << "Raw message:\n"
-                 << std::string(buf->Peek(), size);
+        // LOG_INFO << "Raw message:\n"
+        //          << std::string(buf->Peek(), size);
 
-        LOG_INFO << "Received message, size=" << (int)(buf->ReadableBytes());
-        LOG_INFO << "Message content: \n"
-                 << std::string(buf->Peek(), buf->ReadableBytes());
+        // LOG_INFO << "Received message, size=" << (int)(buf->ReadableBytes());
+        // LOG_INFO << "Message content: \n"
+        //          << std::string(buf->Peek(), buf->ReadableBytes());
 
         auto &ctx = std::any_cast<HttpContext &>(conn->GetMutableContext());
         context = &ctx;
@@ -103,7 +103,7 @@ void HttpServer::HandleOnMessage(const ConnectionPtr &conn, Buffer *buf)
 
         if (context->GotAll())
         {
-            LOG_INFO << "Got complete request, path=" << context->GetRequest().GetPath();
+            // LOG_INFO << "Got complete request, path=" << context->GetRequest().GetPath();
             OnRequest(conn, context->GetRequest());
             context->Reset();
         }
@@ -148,8 +148,8 @@ void HttpServer::OnMessage(const ConnectionPtr &conn, Buffer *buf)
         }
 
         LOG_INFO << "Received message, size=" << (int)(buf->ReadableBytes());
-        LOG_INFO << "Message content: \n"
-                 << std::string(buf->Peek(), buf->ReadableBytes());
+        // LOG_INFO << "Message content: \n"
+        //          << std::string(buf->Peek(), buf->ReadableBytes());
 
         auto &ctx = std::any_cast<HttpContext &>(conn->GetMutableContext());
         context = &ctx;
@@ -214,8 +214,8 @@ void HttpServer::OnRequest(const ConnectionPtr &conn, const HttpRequest &req)
     resp.AppendToBuffer(&buf);
 
     LOG_INFO << "Sending response, size=" << (int)buf.ReadableBytes();
-    LOG_INFO << "Response content: \n"
-             << std::string(buf.Peek(), buf.ReadableBytes());
+    // LOG_INFO << "Response content: \n"
+    //          << std::string(buf.Peek(), buf.ReadableBytes());
 
     // 发送前再次检查连接状态
     if (conn->Connected())
@@ -236,12 +236,13 @@ void HttpServer::OnRequest(const ConnectionPtr &conn, const HttpRequest &req)
 
 void HttpServer::HandleOnWriteComplete(const ConnectionPtr &conn)
 {
+    (void)conn;
     // 这里可以进行一些清理工作
-    LOG_INFO << conn->peerAddress().ToIpPort() << " write complete";
+    // LOG_INFO << conn->peerAddress().ToIpPort() << " write complete";
 }
 
 void HttpServer::HandleOnClosed(const ConnectionPtr &conn)
 {
-    LOG_INFO << conn->peerAddress().ToIpPort() << " closed";
-    std::cout << conn->peerAddress().ToIpPort() << "断开连接" << std::endl;
+    LOG_INFO << conn->peerAddress().ToIpPort() <<" "<<conn->fd()<< " closed";
+    // std::cout << conn->peerAddress().ToIpPort() << "断开连接" << std::endl;
 }
