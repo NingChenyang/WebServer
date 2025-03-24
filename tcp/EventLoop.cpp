@@ -98,6 +98,10 @@ EventLoop::EventLoop(bool is_main_loop, int time_tvl, int time_out)
 EventLoop::~EventLoop()
 
 {
+	close(wake_up_fd_);
+	close(timer_fd_);
+	wake_channel_->Remove();
+	timer_channel_->Remove();
 }
 
 void EventLoop::Run()
@@ -134,6 +138,19 @@ void EventLoop::AddLoopQueue(std::function<void()> fn)
 	}
 	// 唤醒
 	WakeUp();
+}
+
+void EventLoop::RunInLoop(std::function<void()> fn)
+{
+	if (IsInLoop())
+	{
+		fn();
+	}
+	else
+	{
+		AddLoopQueue(std::move(fn));
+	}
+	
 }
 
 void EventLoop::WakeUp()

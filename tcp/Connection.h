@@ -64,12 +64,12 @@ public:
 		return &output_buffer_;
 	}
 
-	void ShutDown();
+	void Shutdown();
 
 	void ForceClose();
 
 	void ShutdownInLoop(); // Declare the ShutdownInLoop method
-
+	void ForceCloseInLoop();
 	const InetAddress &localAddress() const { return localAddr_; }
 	const InetAddress &peerAddress() const { return peerAddr_; }
 

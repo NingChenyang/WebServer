@@ -17,7 +17,7 @@ Connection::Connection(EventLoop *loop, int sockfd, const InetAddress &localAddr
 							   { HandleError(); });
 	channel_->SetET();
 
-	channel_->EnableReading();
+	
 }
 
 Connection::~Connection()
@@ -141,14 +141,16 @@ void Connection::ConnectEstablished()
 
 void Connection::ConnectDestroyed()
 {
-	if (state_ == StateE::kConnected|| state_ == StateE::kDisconnecting)
+	if (state_ == StateE::kConnected)
 	{
 		SetState(StateE::kDisconnected);
 		channel_->DisableAll();
 		// 调用用户设置的连接成功或断开的回调函数
 		// std::cout << "断开连接" << std::endl;
-		channel_->Remove();
+		closedCallback_(shared_from_this());
 	}
+	channel_->Remove();
+	loop_->RemoveLoopConn(fd());
 }
 
 bool Connection::Timeout(time_t now, int val)
@@ -156,16 +158,14 @@ bool Connection::Timeout(time_t now, int val)
 	return now - last_time_.TimeToInt() > val;
 }
 
-void Connection::ShutDown()
+void Connection::Shutdown()
 {
 
 	if (state_ == StateE::kConnected)
 	{
 		SetState(StateE::kDisconnecting);
-		if (!channel_->IsWrite())
-		{
-			shutdown(fd(), SHUT_WR);
-		}
+		loop_->AddLoopQueue([this]()
+							{ ShutdownInLoop(); });
 	}
 }
 
@@ -174,7 +174,15 @@ void Connection::ForceClose()
 	if (state_ == StateE::kConnected || state_ == StateE::kDisconnecting)
 	{
 		SetState(StateE::kDisconnecting);
-		HandleClose();
+		if (loop_->IsInLoop())
+		{
+			ForceCloseInLoop();
+		}
+		else
+		{
+			loop_->RunInLoop([this]()
+							 { ForceCloseInLoop(); });
+		}
 	}
 }
 
@@ -227,7 +235,7 @@ void Connection::HandleWrite()
 			// 如果正在关闭连接，发送完最后的数据后关闭写端
 			if (state_ == StateE::kDisconnecting)
 			{
-				ShutdownInLoop();
+				Shutdown();
 			}
 		}
 	}
@@ -246,15 +254,27 @@ void Connection::HandleWrite()
 
 void Connection::HandleClose()
 {
-	if (closedCallback_)
+	// channel_->DisableAll();
+	if (state_ == StateE::kDisconnected)
 	{
-		closedCallback_(shared_from_this());
+		return;
 	}
+	if (state_ == StateE::kConnecting)
+		std::cout << "连接状态" << std::endl;
+	assert(state_ == StateE::kConnected || state_ == StateE::kDisconnecting);
+	SetState(StateE::kDisconnected);
+	channel_->Remove();
+	//可能不在同一个线程，加锁了，如果不在就需要调用RunInLoop
+	loop_->RemoveLoopConn(fd());
 	if (RemoveLoopConnCallback_)
 	{
 		RemoveLoopConnCallback_(shared_from_this());
 	}
-	loop_->RemoveLoopConn(fd());
+
+	if (closedCallback_)
+	{
+		closedCallback_(shared_from_this());
+	}
 	// closeCallback_就是Server::removeConnection()函数
 }
 
@@ -289,13 +309,8 @@ void Connection::HandleError()
 // 新增函数，用于在IO线程中安全关闭连接
 void Connection::ShutdownInLoop()
 {
-	if (state_ == StateE::kDisconnected || state_ == StateE::kDisconnecting)
-	{
-		return;
-	}
-
-	SetState(StateE::kDisconnecting);
-
+	// 确保在IO线程中调用
+	assert(loop_->IsInLoop());
 	// 只有当没有待写数据时才关闭写端
 	if (!channel_->IsWrite() && output_buffer_.ReadableBytes() == 0)
 	{
@@ -306,6 +321,18 @@ void Connection::ShutdownInLoop()
 				HandleError();
 			}
 		}
+	}
+}
+
+void Connection::ForceCloseInLoop()
+{
+	// 确保在IO线程中调用
+	assert(loop_->IsInLoop());
+	if (state_ == StateE::kConnected || state_ == StateE::kDisconnecting)
+	{
+		// 关闭连接
+		HandleClose();
+		// SetState(StateE::kDisconnected);
 	}
 }
 

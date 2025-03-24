@@ -51,6 +51,7 @@ public:
 	void Stop();
 	bool IsInLoop();
 	void AddLoopQueue(std::function<void()> fn);
+	void RunInLoop(std::function<void()> fn);
 	void WakeUp();
 
 	void UpdateChannel(Channel* ch);

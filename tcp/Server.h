@@ -42,6 +42,8 @@ private:
 
 	void HandleNewConntion(int cfd, const InetAddress& peerAddr);
 	void HandleRemoveConntion(const ConnectionPtr& conn);
+	void HandleRemoveConntionInLoop(const ConnectionPtr &conn);
+
 public:
 	Server(InetAddress& serv_addr, int thread_nums);
 	~Server();

@@ -102,19 +102,26 @@ void Server::HandleNewConntion(int cfd, const InetAddress &peerAddr)
 
 	conn->SetRemoveConnCallback([this](const ConnectionPtr &conn)
 								{ HandleRemoveConntion(conn); });
-	conn->ConnectEstablished();
+
+	sub_loop_[cfd % thread_nums_]->RunInLoop([conn]()
+											 { conn->ConnectEstablished(); });
 }
 
 void Server::HandleRemoveConntion(const ConnectionPtr &conn)
 {
+
+	main_loop_->RunInLoop([this, conn]()
+						  { HandleRemoveConntionInLoop(conn); });
+}
+
+void Server::HandleRemoveConntionInLoop(const ConnectionPtr &conn)
+{
+	// std::lock_guard<std::mutex> lock(mutex_);
+	auto it = connections_.find(conn->fd());
+	if (it != connections_.end())
 	{
-		std::lock_guard<std::mutex> lock(mutex_);
-		auto it = connections_.find(conn->fd());
-		if (it != connections_.end())
-		{
-			connections_.erase(it);
-		}
+		connections_.erase(it);
 	}
-	if(conn)
-	conn->ConnectDestroyed();
+	// conn->GetLoop()->AddLoopQueue([conn]()
+	// 						   { conn->ConnectDestroyed(); });
 }

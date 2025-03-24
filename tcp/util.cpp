@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include<string.h>
+#include <cassert>
 
 void sockets::SetNonblock(int sockfd)
 {
@@ -86,8 +87,11 @@ pid_t ProcessInfo::pid()
 
 void perror_if(bool condtion, const char* errorMessage)
 {
+
 	if (condtion) {
 		perror(errorMessage);
+		assert(!condtion);
 		exit(1);
 	}
+	
 }
