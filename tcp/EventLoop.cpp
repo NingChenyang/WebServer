@@ -26,7 +26,7 @@ void EventLoop::HandleWakeUp()
 }
 void EventLoop::NewLoopConntion(ConnectionPtr conn)
 {
-	std::lock_guard<std::mutex> gd(cmutex_);
+	// std::lock_guard<std::mutex> gd(cmutex_);
 	loop_conns_[conn->fd()] = conn;
 	// for (auto &a : loop_conns_)
 	// {
@@ -36,7 +36,7 @@ void EventLoop::NewLoopConntion(ConnectionPtr conn)
 
 void EventLoop::RemoveLoopConn(int fd)
 {
-	std::lock_guard<std::mutex> lock(cmutex_);
+	// std::lock_guard<std::mutex> lock(cmutex_);
 	loop_conns_.erase(fd);
 	
 }

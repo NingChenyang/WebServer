@@ -76,7 +76,11 @@ void Server::HandleNewConntion(int cfd, const InetAddress &peerAddr)
 
 	auto conn = std::make_shared<Connection>(sub_loop_[cfd % thread_nums_].get(), cfd, localAddr, peerAddr);
 	// connectedCallback_(conn);
-	sub_loop_[cfd % thread_nums_]->NewLoopConntion(conn);
+	// sub_loop_[cfd % thread_nums_]->NewLoopConntion(conn);
+	sub_loop_[cfd % thread_nums_]->RunInLoop([this, cfd, conn]()
+											 { sub_loop_[cfd % thread_nums_]->NewLoopConntion(conn); });
+
+	
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
 		connections_[cfd] = conn;

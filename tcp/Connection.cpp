@@ -265,7 +265,11 @@ void Connection::HandleClose()
 	SetState(StateE::kDisconnected);
 	channel_->Remove();
 	//可能不在同一个线程，加锁了，如果不在就需要调用RunInLoop
-	loop_->RemoveLoopConn(fd());
+	
+	loop_->RunInLoop([this](){loop_->RemoveLoopConn(fd());});
+	// loop_->RemoveLoopConn(fd());
+
+
 	if (RemoveLoopConnCallback_)
 	{
 		RemoveLoopConnCallback_(shared_from_this());
