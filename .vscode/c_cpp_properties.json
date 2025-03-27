@@ -3,7 +3,8 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "/usr/include/mysql"
             ],
             "defines": [
                 "_POSIX_C_SOURCE=200809L"

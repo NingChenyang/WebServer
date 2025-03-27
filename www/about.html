@@ -12,17 +12,30 @@
         <ul>
             <li><a href="index.html">首页</a></li>
             <li><a href="about.html" class="active">关于</a></li>
+            <li><a href="benchmark.html">性能测试</a></li>
             <li><a href="contact.html">联系我们</a></li>
         </ul>
     </nav>
     <div class="container">
         <h1>关于我们</h1>
-        <p>这是一个基于C++的高性能Web服务器项目。</p>
+        <p>这是一个基于C++11的高性能Web服务器项目。该项目旨在探索高性能服务器开发技术，实现了一个麻雀虽小但五脏俱全的HTTP服务器。</p>
+
         <h2>主要特性：</h2>
         <ul>
-            <li>多线程处理</li>
-            <li>异步IO</li>
-            <li>支持HTTP协议</li>
+            <li>多线程处理：使用线程池处理并发请求</li>
+            <li>异步IO：基于Epoll ET的事件驱动</li>
+            <li>支持HTTP协议：实现HTTP 1.0/1.1</li>
+            <li>定时器：基于小根堆的定时器，处理超时连接</li>
+            <li>日志系统：异步日志，记录服务器运行状态</li>
+            <li>配置系统：支持灵活的服务器配置</li>
+        </ul>
+
+        <h2>技术栈：</h2>
+        <ul>
+            <li>语言：C++ 11</li>
+            <li>构建工具：CMake</li>
+            <li>开发平台：Linux</li>
+            <li>核心技术：Epoll + 线程池 + Reactor模式</li>
         </ul>
     </div>
 </body>

@@ -22,6 +22,7 @@ ThreadPool::ThreadPool(size_t nums, std::string thread_type) : stop_(false), thr
                         this->taskqueue_.pop();
 
                     }
+                    // if(thread_type_ == "worker")
                     //    std::cout << thread_type_ << "thread is " << "running:" << syscall(SYS_gettid) << std::endl;
                     task();
                 } });

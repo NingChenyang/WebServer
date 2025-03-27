@@ -87,11 +87,12 @@ EventLoop::EventLoop(bool is_main_loop, int time_tvl, int time_out)
 
 	wake_channel_->SetReadCallback(std::bind(&EventLoop::HandleWakeUp, this));
 	wake_channel_->EnableReading();
-	timer_channel_->SetReadCallback(std::bind(&EventLoop::HandleTimer, this));
-	timer_channel_->EnableReading();
-	if (is_main_loop)
+	
+	if (!is_main_loop)
 	{
-		// 可以添加主事件循环特有的初始化
+		// 可以添加事件循环特有的初始化
+		timer_channel_->SetReadCallback(std::bind(&EventLoop::HandleTimer, this));
+		timer_channel_->EnableReading();
 	}
 }
 

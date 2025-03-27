@@ -1,0 +1,11 @@
+{
+    "host": "172.21.211.240",
+    "port": 3307,
+    "user": "admin",
+    "passwd": "Admin5932!",
+    "db": "test",
+    "min_conn": 100,
+    "max_conn": 1024,
+    "max_idle_time": 5000,
+    "time_out": 1000
+}

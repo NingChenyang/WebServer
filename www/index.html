@@ -12,6 +12,7 @@
         <ul>
             <li><a href="index.html" class="active">首页</a></li>
             <li><a href="about.html">关于</a></li>
+            <li><a href="benchmark.html">性能测试</a></li>
             <li><a href="contact.html">联系我们</a></li>
         </ul>
     </nav>
@@ -23,21 +24,24 @@
         <div class="feature-grid">
             <div class="feature-item">
                 <h3>高性能</h3>
-                <p>能够处理上万并发连接，响应时间小于1ms</p>
+                <p>采用Reactor模式，能够处理上万并发连接，响应时间小于1ms</p>
             </div>
             <div class="feature-item">
                 <h3>多线程</h3>
-                <p>采用高效的线程池设计，充分利用多核CPU</p>
+                <p>采用高效的线程池设计，实现one loop per thread模型，充分利用多核CPU</p>
             </div>
             <div class="feature-item">
                 <h3>异步IO</h3>
-                <p>使用Epoll实现高效的事件驱动模型</p>
+                <p>使用Epoll边缘触发(ET)实现高效的事件驱动模型</p>
             </div>
             <div class="feature-item">
                 <h3>稳定性</h3>
-                <p>经过严格的压力测试，稳定可靠</p>
+                <p>采用双缓冲异步日志系统，经过严格的压力测试，稳定可靠</p>
             </div>
         </div>
+
+        <h2>开源项目</h2>
+        <p>本项目已在GitHub开源，欢迎访问<a href="https://github.com/NingChenyang/WebServer">项目主页</a>进行交流。</p>
 
         <h2>性能指标</h2>
         <div class="metrics">

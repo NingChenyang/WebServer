@@ -54,6 +54,9 @@
   "window.dialogStyle": "custom",
   "debug.showBreakpointsInOverviewRuler": true,
   "files.associations": {
+    "*.sqlbook": "sql",
+    "*.ndjson": "jsonl",
+    "*.dbclient-js": "javascript",
     "typeinfo": "c",
     "cmath": "cpp",
     "ostream": "cpp",
@@ -114,7 +117,8 @@
     "any": "cpp",
     "codecvt": "cpp",
     "iomanip": "cpp",
-    "sstream": "cpp"
+    "sstream": "cpp",
+    "set": "cpp"
   },
   // "C_Cpp.errorSquiggles": "disabled",
   "C_Cpp_Runner.msvcWarnings": [

@@ -24,6 +24,31 @@
                 "isDefault": true
             },
             "detail": "调试器生成的任务。"
+        },
+        {
+            "type": "cppbuild",
+            "label": "testmysql",
+            "command": "g++ MysqlConnPool.cpp MysqlConn.cpp main.cpp ../jsoncpp/jsoncpp.cpp -o test1  $(mysql_config --cflags) $(mysql_config --libs) -lpthread", // 使用Mafile编译
+            // "command": "A:\\QT\\Tools\\mingw1310_64\\bin\\g++.exe",
+            "args": [
+                //"-fdiagnostics-color=always",
+                //"-g",
+                //"${file}",
+                //"-o",
+                //"${fileDirname}/${fileBasenameNoExtension}"
+            ],
+            "options": {
+                // "cwd": "${workspaceFolder}" //项目所在目录
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "调试器生成的任务。"
         }
     ],
     "version": "2.0.0"
