@@ -51,6 +51,8 @@ void handleLoginRequest(const HttpRequest &req, HttpResponse *resp)
             resp->SetStatusCode(HttpStatusCode::k302Found);
             resp->SetStatusMessage("Found");
             resp->AddHeader("Location", "/home.html");
+            // 暂时设置cookie
+            // resp->AddHeader("Set-Cookie", "auth_token=valid; Path=/; HttpOnly; Max-Age=3600");
             resp->SetBody(""); // 重定向响应可以不需要响应体
         }
         else
@@ -124,6 +126,7 @@ void HandleRegisterRequest(const HttpRequest &req, HttpResponse *resp)
         resp->SetStatusCode(HttpStatusCode::k302Found);
         resp->SetStatusMessage("Found");
         resp->AddHeader("Location", "/index.html");
+        
         resp->SetBody(""); // 清空响应体
     }
     catch (const std::exception &e)

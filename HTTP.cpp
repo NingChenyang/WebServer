@@ -48,7 +48,20 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
 
     if (req.GetMethod() == Method::kGet)
     {
-
+        //检测登录cookie
+        // if (path == "/home.html")
+        // {
+        //     // 检查 Cookie 中是否包含有效 token
+        //     std::string cookie = req.GetHeader("Cookie");
+        //     if (cookie.find("auth_token=valid") == std::string::npos)
+        //     {
+        //         resp->SetStatusCode(HttpStatusCode::k302Found);
+        //         resp->AddHeader("Location", "/index.html");
+        //         resp->AddHeader("Server", "MyWebServer/1.0");
+        //         resp->SetBody(""); // 清空响应体
+        //         return;
+        //     }
+        // }
         if (path == "/")
         {
             path = "/index.html";

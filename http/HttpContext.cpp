@@ -150,6 +150,7 @@ bool HttpContext::ParseRequest(Buffer *buf, TimeStamp eceiveTime)
                 hasMore = false;
             }
         }
+        buf->RetrieveAll();
         return ok;
     }
 

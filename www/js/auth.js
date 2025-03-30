@@ -22,12 +22,30 @@ document.addEventListener('DOMContentLoaded', function () {
             body: JSON.stringify({
                 username: username,
                 password: password
-            })
+            }),
+            credentials: 'same-origin', // 添加凭证设置
+            redirect: 'follow'
         })
             .then(response => {
                 if (response.redirected) {
-                    window.location.href = response.url;
-                    return;
+                    // 使用 Promise 来控制跳转流程
+                    return new Promise(resolve => {
+                        // 移除事件监听器
+                        document.getElementById('loginForm').removeEventListener('submit', arguments.callee);
+
+                        // 创建一个预加载对象
+                        const preloadLink = document.createElement('link');
+                        preloadLink.rel = 'preload';
+                        preloadLink.as = 'document';
+                        preloadLink.href = response.url;
+                        document.head.appendChild(preloadLink);
+
+                        // 延迟执行实际跳转
+                        setTimeout(() => {
+                            window.location.replace(response.url);
+                            resolve();
+                        }, 100);
+                    });
                 }
                 return response.json();
             })
