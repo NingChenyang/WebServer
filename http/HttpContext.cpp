@@ -46,11 +46,11 @@ bool HttpContext::ParseRequest(Buffer *buf, TimeStamp eceiveTime)
                 const char *colon = std::find(buf->Peek(), crlf, ':');
                 if (colon != crlf)
                 {
-                    const char* space=std::find(colon,crlf,' ');
-                    if (space!=crlf)
-                    {
-                        colon=space;
-                    }
+                    // const char* space=std::find(colon,crlf,' ');
+                    // if (space!=crlf)
+                    // {
+                    //     colon=space;
+                    // }
                     
                     
                     request_.AddHeader(buf->Peek(), colon, crlf);

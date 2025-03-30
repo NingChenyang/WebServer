@@ -103,7 +103,7 @@ const std::string &HttpRequest::GetPath() const
 
 void HttpRequest::AddHeader(const char *start, const char *colon, const char *end)
 {
-    std::string field(start, colon);
+    std::string field(start, colon-1);
     ++colon;
     while (colon < end && isspace(*colon))
     {

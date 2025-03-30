@@ -7,7 +7,7 @@
 #include "mysql/MysqlConnPool.h"
 #include <signal.h>
 #include "jsoncpp/json/json.h"
-#include"handle.h"
+#include "handle.h"
 extern const std::string ROOT_DIR = ".";                   // 定义网站根目录
 std::string Logger::log_file_basename_ = "../logs/server"; // 修改默认日志路径
 
@@ -32,7 +32,6 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
     // 处理API请求
     if (req.GetMethod() == Method::kPost)
     {
-
         if (path == "/api/login")
         {
             handleLoginRequest(req, resp);
@@ -43,25 +42,30 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
             HandleRegisterRequest(req, resp);
             return;
         }
-        
+        else if (path == "/api/logout") // 新增
+        {
+            HandleLogoutRequest(req, resp);
+            return;
+        }
     }
 
     if (req.GetMethod() == Method::kGet)
     {
-        //检测登录cookie
-        // if (path == "/home.html")
-        // {
-        //     // 检查 Cookie 中是否包含有效 token
-        //     std::string cookie = req.GetHeader("Cookie");
-        //     if (cookie.find("auth_token=valid") == std::string::npos)
-        //     {
-        //         resp->SetStatusCode(HttpStatusCode::k302Found);
-        //         resp->AddHeader("Location", "/index.html");
-        //         resp->AddHeader("Server", "MyWebServer/1.0");
-        //         resp->SetBody(""); // 清空响应体
-        //         return;
-        //     }
-        // }
+        // 对home.html进行访问控制
+        if (req.GetMethod() == Method::kGet && path == "/home.html")
+        {
+            std::string cookie = req.GetHeader("Cookie");
+            if (cookie.find("auth_token=valid") == std::string::npos)
+            {
+                // 未授权访问,重定向到登录页
+                resp->SetStatusCode(HttpStatusCode::k302Found);
+                resp->SetStatusMessage("Found");
+                resp->AddHeader("Location", "/index.html");
+                resp->SetBody("");
+                return;
+            }
+        }
+
         if (path == "/")
         {
             path = "/index.html";

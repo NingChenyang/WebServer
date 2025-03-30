@@ -15,5 +15,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+
 void handleLoginRequest(const HttpRequest &req, HttpResponse *resp);
 void HandleRegisterRequest(const HttpRequest &req, HttpResponse *resp);
+void HandleLogoutRequest(const HttpRequest &req, HttpResponse *resp); // 新增

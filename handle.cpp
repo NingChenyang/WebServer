@@ -51,8 +51,8 @@ void handleLoginRequest(const HttpRequest &req, HttpResponse *resp)
             resp->SetStatusCode(HttpStatusCode::k302Found);
             resp->SetStatusMessage("Found");
             resp->AddHeader("Location", "/home.html");
-            // 暂时设置cookie
-            // resp->AddHeader("Set-Cookie", "auth_token=valid; Path=/; HttpOnly; Max-Age=3600");
+            resp->AddHeader("Set-Cookie", "auth_token=valid; Path=/; HttpOnly; SameSite=Strict; Max-Age=3600");
+
             resp->SetBody(""); // 重定向响应可以不需要响应体
         }
         else
@@ -114,8 +114,8 @@ void HandleRegisterRequest(const HttpRequest &req, HttpResponse *resp)
         {
             throw std::runtime_error("用户名已存在");
         }
-            // 插入新用户
-            std::string insertSql = "INSERT INTO user (username, password) VALUES ('" + username + "', '" + password + "')";
+        // 插入新用户
+        std::string insertSql = "INSERT INTO user (username, password) VALUES ('" + username + "', '" + password + "')";
 
         if (!conn->Update(insertSql))
         {
@@ -126,7 +126,7 @@ void HandleRegisterRequest(const HttpRequest &req, HttpResponse *resp)
         resp->SetStatusCode(HttpStatusCode::k302Found);
         resp->SetStatusMessage("Found");
         resp->AddHeader("Location", "/index.html");
-        
+
         resp->SetBody(""); // 清空响应体
     }
     catch (const std::exception &e)
@@ -135,10 +135,37 @@ void HandleRegisterRequest(const HttpRequest &req, HttpResponse *resp)
         Json::Value response;
         response["success"] = false;
         response["message"] = e.what();
-        std::cout<<"error: "<<e.what()<<std::endl;
+        std::cout << "error: " << e.what() << std::endl;
         resp->SetStatusCode(HttpStatusCode::k400BadRequest);
         resp->SetStatusMessage("Bad Request");
         resp->SetContentType("application/json");
         resp->SetBody(response.toStyledString());
+    }
+}
+
+void HandleLogoutRequest(const HttpRequest &req, HttpResponse *resp)
+{
+    try
+    {
+        // 设置过期的 cookie 来清除认证
+        resp->SetStatusCode(HttpStatusCode::k302Found);
+        resp->SetStatusMessage("Found");
+        resp->AddHeader("Location", "/index.html");
+        // 设置立即过期的 cookie
+        resp->AddHeader("Set-Cookie", "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly; SameSite=Strict");
+        resp->SetBody("");
+    }
+    catch (const std::exception &e)
+    {
+        Json::Value response;
+        response["success"] = false;
+        response["message"] = e.what();
+
+        resp->SetStatusCode(HttpStatusCode::k400BadRequest);
+        resp->SetStatusMessage("Bad Request");
+        resp->SetContentType("application/json");
+        resp->SetBody(response.toStyledString());
+
+        LOG_ERROR << "Logout error: " << e.what();
     }
 }
