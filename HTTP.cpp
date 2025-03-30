@@ -51,8 +51,26 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
 
     if (req.GetMethod() == Method::kGet)
     {
+        if (path == "/")
+        {
+            path = "/index.html";
+        }
         // 对home.html进行访问控制
-        if (req.GetMethod() == Method::kGet && path == "/home.html")
+        if (path != "/index.html"&&path.ends_with(".html"))
+        {
+            // 检查Cookie是否存在
+            std::string cookie = req.GetHeader("Cookie");
+            if (cookie.find("auth_token=valid") == std::string::npos)
+            {
+                // 未授权访问,重定向到登录页
+                resp->SetStatusCode(HttpStatusCode::k302Found);
+                resp->SetStatusMessage("Found");
+                resp->AddHeader("Location", "/index.html");
+                resp->SetBody("");
+                return;
+            }
+        }
+        else if (path == "/home.html")
         {
             std::string cookie = req.GetHeader("Cookie");
             if (cookie.find("auth_token=valid") == std::string::npos)
@@ -66,10 +84,7 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
             }
         }
 
-        if (path == "/")
-        {
-            path = "/index.html";
-        }
+        
 
         std::string filepath = ROOT_DIR + path;
         std::string content = ReadFile(filepath);
