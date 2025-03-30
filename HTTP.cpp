@@ -4,8 +4,10 @@
 #include "http/HttpUtil.h"
 #include <iostream>
 #include <filesystem>
+#include "mysql/MysqlConnPool.h"
 #include <signal.h>
-
+#include "jsoncpp/json/json.h"
+#include"handle.h"
 extern const std::string ROOT_DIR = ".";                   // 定义网站根目录
 std::string Logger::log_file_basename_ = "../logs/server"; // 修改默认日志路径
 
@@ -26,47 +28,68 @@ void SignalHandler(int sig)
 void onRequest(const HttpRequest &req, HttpResponse *resp)
 {
     std::string path = req.GetPath();
-    // LOG_INFO << "Handling request for path: " << path;
 
-    if (path == "/")
+    // 处理API请求
+    if (req.GetMethod() == Method::kPost)
     {
-        path = "/index.html";
+
+        if (path == "/api/login")
+        {
+            handleLoginRequest(req, resp);
+            return;
+        }
+        else if (path == "/api/register")
+        {
+            HandleRegisterRequest(req, resp);
+            return;
+        }
+        
     }
 
-    std::string filepath = ROOT_DIR + path;
-    // LOG_INFO << "Full filepath: " << filepath;
+    if (req.GetMethod() == Method::kGet)
+    {
 
-    std::string content = ReadFile(filepath);
-    if (content.empty())
-    {
-        LOG_WARN << "File not found: " << filepath;
-        resp->SetStatusCode(HttpStatusCode::k404NotFound);
-        resp->SetStatusMessage("Not Found");
-        resp->SetContentType("text/html");
-        resp->SetBody("<html><body><h1>404 Not Found</h1></body></html>");
-    }
-    else
-    {
-        // LOG_INFO << "File found, size=" << (int)content.size();
-        resp->SetStatusCode(HttpStatusCode::k200Ok);
-        resp->SetStatusMessage("OK");
-        resp->SetContentType(GetFileType(filepath));
-        resp->SetBody(std::move(content));
-    }
+        if (path == "/")
+        {
+            path = "/index.html";
+        }
 
-    // 设置通用响应头
-    resp->AddHeader("Server", "MyWebServer/1.0");
-    if (!resp->GetCloseConnection())
-    {
-        resp->AddHeader("Connection", "Keep-Alive");
-        resp->AddHeader("Keep-Alive", "timeout=60");
+        std::string filepath = ROOT_DIR + path;
+        std::string content = ReadFile(filepath);
+        if (content.empty())
+        {
+            LOG_WARN << "File not found: " << filepath;
+            resp->SetStatusCode(HttpStatusCode::k404NotFound);
+            resp->SetStatusMessage("Not Found");
+            resp->SetContentType("text/html");
+            resp->SetBody("<html><body><h1>404 Not Found</h1></body></html>");
+        }
+        else
+        {
+            resp->SetStatusCode(HttpStatusCode::k200Ok);
+            resp->SetStatusMessage("OK");
+            resp->SetContentType(GetFileType(filepath));
+            resp->SetBody(std::move(content));
+        }
+
+        // 设置通用响应头
+        resp->AddHeader("Server", "MyWebServer/1.0");
+        if (!resp->GetCloseConnection())
+        {
+            // 在返回静态文件的地方添加
+            resp->AddHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            resp->AddHeader("Pragma", "no-cache");
+            resp->AddHeader("Expires", "0");
+            resp->AddHeader("Connection", "Keep-Alive");
+            resp->AddHeader("Keep-Alive", "timeout=60");
+        }
     }
 }
 
 int main()
 {
     // 忽略SIGPIPE信号
-    // signal(SIGPIPE, SIG_IGN);
+    signal(SIGPIPE, SIG_IGN);
 
     // 注册SIGINT和SIGTERM的处理函数
     struct sigaction sa;
@@ -75,17 +98,13 @@ int main()
     sigaction(SIGINT, &sa, NULL);  // Ctrl+C
     sigaction(SIGTERM, &sa, NULL); // kill
 
-    std::filesystem::current_path("./www");
-
     try
     {
-        // 修改监听地址为0.0.0.0，接受所有网卡的连接
-        InetAddress listenAddr("0.0.0.0", 8888);
-
+        std::filesystem::current_path("./www");
+        InetAddress listenAddr("0.0.0.0", 8888); // 修改监听地址为0.0.0.0，接受所有网卡的连接
         HttpServer server(listenAddr, 3, 4);
-        g_server = &server; // 设置全局指针
-
         server.SetHttpCallback(onRequest);
+        g_server = &server; // 设置全局指针
 
         std::cout << "HTTP server starting on http://0.0.0.0:8888" << std::endl;
         std::cout << "Press Ctrl+C to stop" << std::endl;

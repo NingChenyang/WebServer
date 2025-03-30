@@ -22,7 +22,7 @@ MYSQL_SRCS	:=$(wildcard mysql/*.cpp)
 JSON_SRCS :=$(wildcard jsoncpp/jsoncpp.cpp)
 
 # 合并所有源文件
-ALL_SRCS = HTTP.cpp $(TCP_SRCS) $(HTTP_SRCS) $(LOG_SRCS) $(MYSQL_SRCS) $(JSON_SRCS)
+ALL_SRCS = HTTP.cpp $(TCP_SRCS) $(HTTP_SRCS) $(LOG_SRCS) $(MYSQL_SRCS) $(JSON_SRCS) handle.cpp
 
 # 生成对应的.o文件列表
 ALL_OBJS = $(addprefix $(OBJ_DIR)/, $(patsubst %.cpp,%.o,$(ALL_SRCS)))
@@ -54,7 +54,7 @@ init:
 
 # 编译HTTP服务器
 $(HTTP_TARGET): $(ALL_OBJS)
-	$(CXX) $^ -o $(BIN_DIR)/$@ $(CXXFLAGS) -pthread $(MYSQL_LIBS)
+	$(CXX) $^ -o $@ $(CXXFLAGS) -pthread $(MYSQL_LIBS)
 
 # 编译.o文件的规则
 $(OBJ_DIR)/%.o: %.cpp

@@ -114,13 +114,14 @@ void Server::HandleNewConntion(int cfd, const InetAddress &peerAddr)
 void Server::HandleRemoveConntion(const ConnectionPtr &conn)
 {
 
+	// HandleRemoveConntionInLoop(conn);
 	main_loop_->RunInLoop([this, conn]()
 						  { HandleRemoveConntionInLoop(conn); });
 }
 
 void Server::HandleRemoveConntionInLoop(const ConnectionPtr &conn)
 {
-	// std::lock_guard<std::mutex> lock(mutex_);
+	std::lock_guard<std::mutex> lock(mutex_);
 	auto it = connections_.find(conn->fd());
 	if (it != connections_.end())
 	{

@@ -125,11 +125,24 @@ void Channel::HandleEvent()
 {
 	if (tied_)
 	{
-		auto guard = tie_.lock();
-		if (guard)
-		{
-			HandleEventWithGuard();
+		if(tie_.expired())
+		{ // 如果tie_过期了，说明这个Channel已经不需要了，直接返回
+			return;
 		}
+		else
+		{ // 如果没有过期，说明这个Channel还在使用中，继续执行下面的代码
+			auto tie = tie_.lock();
+			if (tie == nullptr)
+			{
+				return;
+			}
+			else if (tie)
+			{
+				HandleEventWithGuard();
+			}
+		}
+		
+		
 	}
 	else
 	{ // 这个else里面是用来建立连接的，因为开始建立连接的时候tied_是false,是连接建立后开始通信tied_才为true

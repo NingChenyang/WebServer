@@ -18,9 +18,12 @@ enum class HttpStatusCode
 {
     kUnknown,
     k200Ok = 200,
+    k201Created = 201,
     k301MovedPermanently = 301,
+    k302Found = 302,
     k400BadRequest = 400,
     k404NotFound = 404,
+    k500InternalServerError = 500
 };
 enum class Version
 {

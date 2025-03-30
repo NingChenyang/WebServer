@@ -9,110 +9,113 @@
 
 <body>
     <nav>
-        <ul>
-            <li><a href="index.html">首页</a></li>
+        <ul class="nav-list">
+            <li><a href="home.html">首页</a></li>
             <li><a href="about.html">关于</a></li>
             <li><a href="benchmark.html" class="active">性能测试</a></li>
             <li><a href="contact.html">联系我们</a></li>
         </ul>
     </nav>
+
     <div class="container">
-        <h1>性能测试报告</h1>
-
-        <h2>测试环境</h2>
-        <ul>
-            <li>处理器：Intel Core i7-9700K (8核16线程)</li>
-            <li>内存：16GB DDR4 3200MHz</li>
-            <li>系统：Ubuntu 20.04 LTS</li>
-            <li>编译器：g++ 9.4.0</li>
-            <li>测试工具：Apache Benchmark (ab)</li>
-            <li>测试时间：2023年10月</li>
-        </ul>
-
-        <h2>测试方法</h2>
-        <p>使用Apache Benchmark工具，测试HTTP短连接和长连接性能：</p>
-        <ul>
-            <li>测试命令：ab -n 100000 -c 1000 http://localhost:8080/</li>
-            <li>测试时长：每组测试持续5分钟</li>
-            <li>重复测试：每组数据重复测试3次取平均值</li>
-        </ul>
-
-        <h2>测试结果</h2>
-        <table class="benchmark-table">
-            <tr>
-                <th>并发数</th>
-                <th>总请求数</th>
-                <th>QPS</th>
-                <th>平均响应时间</th>
-            </tr>
-            <tr>
-                <td>100</td>
-                <td>10000</td>
-                <td>12000</td>
-                <td>0.3ms</td>
-            </tr>
-            <tr>
-                <td>1000</td>
-                <td>10000</td>
-                <td>11500</td>
-                <td>0.5ms</td>
-            </tr>
-            <tr>
-                <td>10000</td>
-                <td>100000</td>
-                <td>10800</td>
-                <td>0.8ms</td>
-            </tr>
-        </table>
-
-        <h2>测试结果</h2>
-        <table class="benchmark-table">
-            <tr>
-                <th>并发数</th>
-                <th>运行时间</th>
-                <th>QPS</th>
-                <th>吞吐量</th>
-                <th>成功请求</th>
-                <th>失败请求</th>
-                <th>工作线程</th>
-            </tr>
-            <tr>
-                <td>4000</td>
-                <td>10s</td>
-                <td>36216</td>
-                <td>60.27MB/s</td>
-                <td>362163</td>
-                <td>1</td>
-                <td>否</td>
-            </tr>
-            <tr>
-                <td>5000</td>
-                <td>10s</td>
-                <td>19663</td>
-                <td>31.95MB/s</td>
-                <td>196634</td>
-                <td>0</td>
-                <td>是</td>
-            </tr>
-        </table>
-
-        <h2>测试结果分析</h2>
-        <p>从测试数据可以看出：</p>
-        <ul>
-            <li>在不使用工作线程的情况下，服务器在4000并发时性能最优，QPS达到36216，吞吐量达到60.27MB/s</li>
-            <li>使用工作线程后，在5000并发下QPS为19663，吞吐量为31.95MB/s</li>
-            <li>测试结果表明，对于简单的静态页面请求，单线程模型反而具有更好的性能</li>
-            <li>这可能是由于工作线程带来的线程切换开销超过了其带来的并发处理优势</li>
-            <li>在高并发场景下，服务器展现出良好的稳定性，失败请求极少</li>
-        </ul>
-
-        <h2>测试命令</h2>
-        <pre>webbench -c [并发数] -t 10 http://172.21.211.240:8888/</pre>
-        <p>其中：</p>
-        <ul>
-            <li>-c: 并发客户端数</li>
-            <li>-t: 测试持续时间(秒)</li>
-        </ul>
+        <div class="card">
+            <h1>性能测试报告</h1>
+            
+            <h2>测试环境</h2>
+            <ul>
+                <li>处理器：Intel Core i7-9700K (8核16线程)</li>
+                <li>内存：16GB DDR4 3200MHz</li>
+                <li>系统：Ubuntu 20.04 LTS</li>
+                <li>编译器：g++ 9.4.0</li>
+                <li>测试工具：Apache Benchmark (ab)</li>
+                <li>测试时间：2023年10月</li>
+            </ul>
+            
+            <h2>测试方法</h2>
+            <p>使用Apache Benchmark工具，测试HTTP短连接和长连接性能：</p>
+            <ul>
+                <li>测试命令：ab -n 100000 -c 1000 http://localhost:8080/</li>
+                <li>测试时长：每组测试持续5分钟</li>
+                <li>重复测试：每组数据重复测试3次取平均值</li>
+            </ul>
+            
+            <h2>测试结果</h2>
+            <table class="benchmark-table">
+                <tr>
+                    <th>并发数</th>
+                    <th>总请求数</th>
+                    <th>QPS</th>
+                    <th>平均响应时间</th>
+                </tr>
+                <tr>
+                    <td>100</td>
+                    <td>10000</td>
+                    <td>12000</td>
+                    <td>0.3ms</td>
+                </tr>
+                <tr>
+                    <td>1000</td>
+                    <td>10000</td>
+                    <td>11500</td>
+                    <td>0.5ms</td>
+                </tr>
+                <tr>
+                    <td>10000</td>
+                    <td>100000</td>
+                    <td>10800</td>
+                    <td>0.8ms</td>
+                </tr>
+            </table>
+            
+            <h2>测试结果</h2>
+            <table class="benchmark-table">
+                <tr>
+                    <th>并发数</th>
+                    <th>运行时间</th>
+                    <th>QPS</th>
+                    <th>吞吐量</th>
+                    <th>成功请求</th>
+                    <th>失败请求</th>
+                    <th>工作线程</th>
+                </tr>
+                <tr>
+                    <td>4000</td>
+                    <td>10s</td>
+                    <td>36216</td>
+                    <td>60.27MB/s</td>
+                    <td>362163</td>
+                    <td>1</td>
+                    <td>否</td>
+                </tr>
+                <tr>
+                    <td>5000</td>
+                    <td>10s</td>
+                    <td>19663</td>
+                    <td>31.95MB/s</td>
+                    <td>196634</td>
+                    <td>0</td>
+                    <td>是</td>
+                </tr>
+            </table>
+            
+            <h2>测试结果分析</h2>
+            <p>从测试数据可以看出：</p>
+            <ul>
+                <li>在不使用工作线程的情况下，服务器在4000并发时性能最优，QPS达到36216，吞吐量达到60.27MB/s</li>
+                <li>使用工作线程后，在5000并发下QPS为19663，吞吐量为31.95MB/s</li>
+                <li>测试结果表明，对于简单的静态页面请求，单线程模型反而具有更好的性能</li>
+                <li>这可能是由于工作线程带来的线程切换开销超过了其带来的并发处理优势</li>
+                <li>在高并发场景下，服务器展现出良好的稳定性，失败请求极少</li>
+            </ul>
+            
+            <h2>测试命令</h2>
+            <pre>webbench -c [并发数] -t 10 http://172.21.211.240:8888/</pre>
+            <p>其中：</p>
+            <ul>
+                <li>-c: 并发客户端数</li>
+                <li>-t: 测试持续时间(秒)</li>
+            </ul>
+        </div>
     </div>
 </body>
 

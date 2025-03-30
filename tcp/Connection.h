@@ -41,7 +41,13 @@ public:
 
 	bool Connected() const { return state_ == StateE::kConnected; }
 	bool Disconnected() const { return state_ == StateE::kDisconnected; }
-	void SetState(StateE state) { state_ = state; }
+	void SetState(StateE state)
+	{
+		// 避免重复设置断开状态
+		if (state == StateE::kDisconnected && state_ == StateE::kDisconnected)
+			return;
+		state_ = state;
+	}
 	void Send(Buffer *message);
 	void Send(const void *message, size_t len);
 	void Send(const std::string &messgage);
@@ -82,10 +88,11 @@ public:
 
 	std::mutex &GetMutex() { return mutex_; }
 
+	void HandleClose();
+
 private:
 	void HandleRead();
 	void HandleWrite();
-	void HandleClose();
 	void HandleError();
 
 private:

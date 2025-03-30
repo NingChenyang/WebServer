@@ -42,7 +42,7 @@ bool MysqlConn::Update(const string &sql)
 bool MysqlConn::Query(const string &sql)
 {
     FreeResult();
-    if(mysql_query(conn_, sql.c_str()))
+    if(mysql_query(conn_, sql.c_str())!=0)
     {
         // LOG_WARN << "mysql_query failed";
         return false;
@@ -66,8 +66,12 @@ bool MysqlConn::Next()
 
 string MysqlConn::Value(int index)
 {
+    if(!row_)
+    {
+        return string();
+    }
     int num_fields = mysql_num_fields(res_);
-    if(index >= num_fields||index<0)
+    if(num_fields==0|| index>= num_fields||index<0)
     {
         return string();
     }

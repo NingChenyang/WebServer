@@ -1,6 +1,6 @@
 #include "MysqlConnPool.h"
 
-MysqlConnPool::MysqlConnPool()
+MysqlConnPool::MysqlConnPool():stop_(false)
 {
 
     if (!ParseJsonConfig())
@@ -19,7 +19,7 @@ MysqlConnPool::MysqlConnPool()
 
 bool MysqlConnPool::ParseJsonConfig()
 {
-    fstream file("mysql_config.json");
+    fstream file("../mysql/mysql_config.json");
     if (!file.is_open())
     {
         return false;

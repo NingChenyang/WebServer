@@ -16,18 +16,18 @@ Connection::Connection(EventLoop *loop, int sockfd, const InetAddress &localAddr
 	channel_->SetErrorCallback([this]()
 							   { HandleError(); });
 	channel_->SetET();
-
-	
 }
 
 Connection::~Connection()
 {
-	// 确保连接被正确关闭
-	// std::cout << "conn" << fd() << "析构" << std::endl;
-	if (state_ != StateE::kDisconnected)
+	// 在析构时我们只需要清理资源,不需要触发回调
+	if(state_ == StateE::kConnected || state_ == StateE::kDisconnecting)
 	{
-		HandleClose();
+		SetState(StateE::kDisconnected);
+		channel_->DisableAll();
+		channel_->Remove();
 	}
+	
 }
 
 void Connection::SetOnMessageCallback(const OnMessageCallback &cb)
@@ -131,7 +131,16 @@ void Connection::ConnectEstablished()
 
 	assert(state_ == StateE::kConnecting);
 	SetState(StateE::kConnected);
-	channel_->Tie(shared_from_this());
+	auto tie = shared_from_this();
+	if (tie == nullptr)
+	{
+		std::cout << "tie_过期了，说明这个Channel已经不需要了，直接返回" << std::endl;
+		return;
+	}
+	else
+	{
+		channel_->Tie(tie);
+	}
 	channel_->EnableReading();
 	last_time_ = TimeStamp::Now();
 	// 连接成功后业务处理
@@ -254,32 +263,30 @@ void Connection::HandleWrite()
 
 void Connection::HandleClose()
 {
-	// channel_->DisableAll();
-	if (state_ == StateE::kDisconnected)
-	{
-		return;
-	}
-	if (state_ == StateE::kConnecting)
-		std::cout << "连接状态" << std::endl;
-	assert(state_ == StateE::kConnected || state_ == StateE::kDisconnecting);
+	// HandleClose只能在Connection对象还活着的时候调用
+	// 即只能通过shared_ptr调用,不能在析构函数中调用
+	
+
 	SetState(StateE::kDisconnected);
 	channel_->Remove();
-	//可能不在同一个线程，加锁了，如果不在就需要调用RunInLoop
-	
-	loop_->RunInLoop([this](){loop_->RemoveLoopConn(fd());});
-	// loop_->RemoveLoopConn(fd());
 
+	// 获取shared_from_this必须在调用HandleClose时对象仍然存活
+	ConnectionPtr guardThis(shared_from_this());
+
+	// 按顺序通知关闭连接
+	if (closedCallback_)
+	{
+		closedCallback_(guardThis);
+	}
+
+	// Remove from loop must be done after callbacks
+	loop_->RunInLoop([this]()
+					 { loop_->RemoveLoopConn(fd()); });
 
 	if (RemoveLoopConnCallback_)
 	{
-		RemoveLoopConnCallback_(shared_from_this());
+		RemoveLoopConnCallback_(guardThis);
 	}
-
-	if (closedCallback_)
-	{
-		closedCallback_(shared_from_this());
-	}
-	// closeCallback_就是Server::removeConnection()函数
 }
 
 void Connection::HandleError()
