@@ -21,6 +21,7 @@ void SignalHandler(int sig)
     if (g_server)
     {
         g_server->Stop();
+        MysqlConnPool::GetInstance()->ShutDown();
     }
     exit(0);
 }
@@ -68,19 +69,7 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
                 resp->AddHeader("Location", "/index.html");
                 resp->SetBody("");
                 return;
-            }
-        }
-        else if (path == "/home.html")
-        {
-            std::string cookie = req.GetHeader("Cookie");
-            if (cookie.find("auth_token=valid") == std::string::npos)
-            {
-                // 未授权访问,重定向到登录页
-                resp->SetStatusCode(HttpStatusCode::k302Found);
-                resp->SetStatusMessage("Found");
-                resp->AddHeader("Location", "/index.html");
-                resp->SetBody("");
-                return;
+
             }
         }
 
@@ -134,7 +123,7 @@ int main()
     {
         std::filesystem::current_path("./www");
         InetAddress listenAddr("0.0.0.0", 8888); // 修改监听地址为0.0.0.0，接受所有网卡的连接
-        HttpServer server(listenAddr, 3, 4);
+        HttpServer server(listenAddr, 1, 1);
         server.SetHttpCallback(onRequest);
         g_server = &server; // 设置全局指针
 

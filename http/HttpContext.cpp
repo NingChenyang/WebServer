@@ -71,9 +71,11 @@ bool HttpContext::ParseRequest(Buffer *buf, TimeStamp eceiveTime)
         }
         else if (state_ == HttpRequestPaseState::kExpectBody)
         {
-            if (buf->ReadableBytes())
+            int len = buf->ReadableBytes();
+            if (len)
             {
                 request_.SetQuery(buf->Peek(), buf->BeginWrite());
+                buf->Retrieve(len);
             }
             state_=HttpRequestPaseState::kGotAll;
             hasMore=false;
@@ -142,15 +144,17 @@ bool HttpContext::ParseRequest(Buffer *buf, TimeStamp eceiveTime)
             }
             else if (state_ == HttpRequestPaseState::kExpectBody)
             {
-                if (buf->ReadableBytes())
+                int len = buf->ReadableBytes();
+                if (len)
                 {
                     request_.SetQuery(buf->Peek(), buf->BeginWrite());
+                    buf->Retrieve(len);
                 }
                 state_ = HttpRequestPaseState::kGotAll;
                 hasMore = false;
             }
         }
-        buf->RetrieveAll();
+        // buf->RetrieveAll();
         return ok;
     }
 

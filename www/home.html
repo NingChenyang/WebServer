@@ -50,9 +50,27 @@
                 </div>
             </div>
         </section>
+
+        <section class="chat-section">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2>实时聊天</h2>
+                    <div class="chat-controls">
+                        <button class="chat-btn connect" onclick="connectWebSocket()">连接服务器</button>
+                        <button class="chat-btn disconnect" onclick="closeWebSocket()">断开连接</button>
+                    </div>
+                </div>
+                <div id="messageArea"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="messageInput" placeholder="输入要发送的消息">
+                    <button class="chat-btn send" onclick="sendMessage()">发送</button>
+                </div>
+            </div>
+        </section>
     </div>
-    <!-- 添加延迟加载 -->
+
     <script src="js/home.js" defer></script>
+    <script src="js/chat.js"></script>
 </body>
 
 </html>

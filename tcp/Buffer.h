@@ -51,7 +51,7 @@ public:
     void Append(const char *data, size_t len);
     void Append(const std::string &str);
     void Append(const char *data);
-
+    void Append(const char data, size_t allLen);
     // 确保有足够的可写空间
     void EnsureWritableBytes(size_t len);
 

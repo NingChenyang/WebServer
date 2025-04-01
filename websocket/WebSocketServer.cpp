@@ -1,0 +1,237 @@
+#include "WebSocketServer.h"
+// 默认的回调函数
+void DefaultWebsocketCallback(const Buffer *buf, Buffer *sendBuf)
+{
+    // 进行echo，原数据返回
+    sendBuf->Append(buf->Peek(), buf->ReadableBytes());
+}
+WebSocketServer::WebSocketServer(InetAddress &serv_addr, int io_thread_nums, int Worker_thread_nums)
+    : server_(serv_addr, Worker_thread_nums),
+      websocket_callback_(DefaultWebsocketCallback),
+      worker_pool_(io_thread_nums, "worker")
+{
+    server_.SetOnConnectedCallback(std::bind(&WebSocketServer::HandleNewConnection, this, std::placeholders::_1));
+    server_.SetOnMessageCallback(std::bind(&WebSocketServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
+    server_.SetOnSentCallback(std::bind(&WebSocketServer::HandleSent, this, std::placeholders::_1));
+    server_.SetOnClosedCallback(std::bind(&WebSocketServer::HandleClose, this, std::placeholders::_1));
+}
+
+WebSocketServer::~WebSocketServer()
+{
+}
+
+void WebSocketServer::Start(const std::string &ip, uint16_t port)
+{
+    server_.Run();
+}
+
+void WebSocketServer::Stop()
+{
+    worker_pool_.Stop();
+    server_.Stop();
+}
+
+void WebSocketServer::SetWebsocketCallback(WebsocketCallback callback)
+{
+    websocket_callback_ = callback;
+}
+
+void WebSocketServer::HandleNewConnection(const ConnectionPtr &conn)
+{
+    if (conn->Connected())
+    {
+        LOG_INFO << "New connection established " << conn->fd() << ":" << conn->peerAddress().ToIpPort();
+        try
+        {
+            WebSocketContext *context = new WebSocketContext();
+            conn->SetContext(context); // 使用指针而不是对象
+            LOG_INFO << "WebSocketContext created successfully";
+        }
+        catch (const std::exception &e)
+        {
+            LOG_ERROR << "Failed to create WebSocketContext: " << e.what();
+        }
+    }
+}
+
+void WebSocketServer::HandleMessage(const ConnectionPtr &conn, Buffer *buf)
+{
+    if (worker_pool_.Size() == 0)
+    {
+        OnMessage(conn, buf);
+    }
+    else // 线程池处理
+    {
+        if (conn->Connected())
+        {
+            WebSocketContext *context = any_cast<WebSocketContext *>(conn->GetMutableContext());
+            if (!context)
+            {
+                LOG_ERROR << "WebSocketContext is null";
+                return;
+            }
+            if (context->GetWebSocketState() == WebSocketContext::WebSocketState::kUnconnected)
+            {
+                // 处理握手
+                HttpContext http_context;
+                if (!http_context.ParseRequest(buf))
+                {
+                    LOG_ERROR << "Failed to parse HTTP request";
+                    conn->Send("HTTP/1.1 400 Bad Request\r\n\r\n");
+                    conn->Shutdown();
+                    return;
+                }
+                if (http_context.GotAll())
+                {
+                    auto http_req = http_context.GetRequest();
+                    LOG_INFO << "Upgrade: " << http_req.GetHeader("Upgrade");
+                    LOG_INFO << "Connection: " << http_req.GetHeader("Connection");
+                    LOG_INFO << "Sec-WebSocket-Version: " << http_req.GetHeader("Sec-WebSocket-Version");
+                    LOG_INFO << "Sec-WebSocket-Key: " << http_req.GetHeader("Sec-WebSocket-Key");
+
+                    // 检查Connection头是否包含Upgrade而不是完全相等
+                    if (http_req.GetHeader("Upgrade").find("websocket") == std::string::npos ||
+                        http_req.GetHeader("Connection").find("Upgrade") == std::string::npos ||
+                        http_req.GetHeader("Sec-WebSocket-Version") != "13" ||
+                        http_req.GetHeader("Sec-WebSocket-Key").empty())
+                    {
+                        LOG_ERROR << "Invalid WebSocket upgrade request";
+                        conn->Send("HTTP/1.1 400 Bad Request\r\n\r\n");
+                        conn->Shutdown();
+                        return;
+                    }
+
+                    Buffer hand_shake_buf;
+                    context->HandleHandshake(&hand_shake_buf, http_req.GetHeader("Sec-WebSocket-Key"));
+                    LOG_INFO << "Handshake response: \n"
+                             << std::string(hand_shake_buf.Peek(), hand_shake_buf.ReadableBytes());
+                    conn->Send(&hand_shake_buf);
+                    context->SetWebSocketHandshakeState();
+                    LOG_INFO << "WebSocket handshake completed for " << conn->peerAddress().ToIpPort();
+                }
+            }
+            else
+            {
+                // 处理数据
+                HandleData(conn, context, buf);
+            }
+        }
+        else
+        {
+            LOG_WARN << "Connection is not connected";
+        }
+    }
+}
+
+void WebSocketServer::OnMessage(const ConnectionPtr &conn, Buffer *buf)
+{
+    if (conn->Connected())
+    {
+        WebSocketContext *context = any_cast<WebSocketContext *>(conn->GetMutableContext());
+        if (!context)
+        {
+            LOG_ERROR << "WebSocketContext is null";
+            return;
+        }
+        if (context->GetWebSocketState() == WebSocketContext::WebSocketState::kUnconnected)
+        {
+            // 处理握手逻辑同上
+            HttpContext http_context;
+            if (!http_context.ParseRequest(buf))
+            {
+                LOG_ERROR << "Failed to parse HTTP request";
+                conn->Send("HTTP/1.1 400 Bad Request\r\n\r\n");
+                conn->Shutdown();
+                return;
+            }
+            if (http_context.GotAll())
+            {
+                auto http_req = http_context.GetRequest();
+                if (http_req.GetHeader("Upgrade") != "websocket" ||
+                    http_req.GetHeader("Connection") != "Upgrade" ||
+                    http_req.GetHeader("Sec-WebSocket-Version") != "13" ||
+                    http_req.GetHeader("Sec-WebSocket-Key") == "")
+                {
+                    LOG_ERROR << "Invalid WebSocket upgrade request";
+                    conn->Send("HTTP/1.1 400 Bad Request\r\n\r\n");
+                    conn->Shutdown();
+                    return;
+                }
+
+                Buffer hand_shake_buf;
+                context->HandleHandshake(&hand_shake_buf, http_req.GetHeader("Sec-WebSocket-Key"));
+                conn->Send(&hand_shake_buf);
+                context->SetWebSocketHandshakeState();
+                LOG_INFO << "WebSocket handshake completed for " << conn->peerAddress().ToIpPort();
+            }
+        }
+        else
+        {
+            // 处理数据
+            HandleData(conn, context, buf);
+        }
+    }
+    else
+    {
+        LOG_WARN << "Connection is not connected";
+    }
+}
+
+void WebSocketServer::HandleData(const ConnectionPtr &conn, WebSocketContext *context, Buffer *buf)
+{
+    Buffer data_buf;
+    context->ParseData(buf, &data_buf);
+    WebSocketPacket respondPacket;
+    int opcode = context->GetReqOpcode();
+
+    switch (opcode)
+    {
+    case WebSocketOpcode::kContinuationFrame:
+        respondPacket.SetOpcode(WebSocketOpcode::kContinuationFrame);
+        break;
+    case WebSocketOpcode::kTextFrame:
+        respondPacket.SetOpcode(WebSocketOpcode::kTextFrame);
+        break;
+    case WebSocketOpcode::kBinaryFrame:
+        respondPacket.SetOpcode(WebSocketOpcode::kBinaryFrame);
+        break;
+    case WebSocketOpcode::kCloseFrame:
+        respondPacket.SetOpcode(WebSocketOpcode::kCloseFrame);
+        break;
+    case WebSocketOpcode::kPingFrame: // 心跳响应
+        respondPacket.SetOpcode(WebSocketOpcode::kPongFrame);
+        break;
+    case WebSocketOpcode::kPongFrame:
+        // 不回复
+        break;
+    default:
+        LOG_INFO << "Unknown opcode: " << opcode;
+        break;
+    }
+    Buffer send_buf;
+    if (opcode != WebSocketOpcode::kCloseFrame && opcode != WebSocketOpcode::kPingFrame && opcode != WebSocketOpcode::kPongFrame)
+    {
+        // 处理数据
+        websocket_callback_(&data_buf, &send_buf);
+    }
+    Buffer frame_buf;
+    respondPacket.EncodeFrame(&frame_buf, &send_buf);
+    conn->Send(&frame_buf);
+    context->Reset();
+}
+
+void WebSocketServer::HandleSent(const ConnectionPtr &conn)
+{
+    if (conn->Connected())
+    {
+        LOG_INFO << "Message sent to connection " << conn->fd() << ":" << conn->peerAddress().ToIpPort();
+    }
+}
+
+void WebSocketServer::HandleClose(const ConnectionPtr &conn)
+{
+    if (conn->Connected())
+    {
+        LOG_INFO << "Connection closed " << conn->fd() << ":" << conn->peerAddress().ToIpPort();
+    }
+}

@@ -56,7 +56,15 @@ void Buffer::Append(const std::string &str)
 {
     Append(str.data(), str.size());
 }
-
+// 为了在websocket中掩码使用，一个字节一个字节添加数据
+void Buffer::Append(const char data, size_t allLen)
+{
+    if (WritableBytes() < allLen)
+    {
+        EnsureWritableBytes(allLen); // 扩容
+    }
+    Buffer_[WriteIndex_++] = data;
+}
 void Buffer::Append(const char *data)
 {
     Append(data, strlen(data));

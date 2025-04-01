@@ -21,13 +21,12 @@ Connection::Connection(EventLoop *loop, int sockfd, const InetAddress &localAddr
 Connection::~Connection()
 {
 	// 在析构时我们只需要清理资源,不需要触发回调
-	if(state_ == StateE::kConnected || state_ == StateE::kDisconnecting)
+	if (state_ == StateE::kConnected || state_ == StateE::kDisconnecting)
 	{
 		SetState(StateE::kDisconnected);
 		channel_->DisableAll();
 		channel_->Remove();
 	}
-	
 }
 
 void Connection::SetOnMessageCallback(const OnMessageCallback &cb)
@@ -53,7 +52,7 @@ void Connection::SetOnConnectedCallback(const OnConnectedCallback &cb)
 void Connection::Send(Buffer *message)
 {
 	Send(message->Peek(), message->ReadableBytes());
-	message->RetrieveAll();
+	message->RetrieveAll(); // 还没发送
 }
 
 void Connection::Send(const void *message, size_t len)
@@ -94,7 +93,9 @@ void Connection::SendInLoop(const void *message, size_t len)
 		if (nwrote >= 0)
 		{
 			remaining = len - nwrote;
-			// 如果全部数据已发送完成，触发回调
+			// 及时更新
+			//  output_buffer_.Retrieve(nwrote);
+			//  如果全部数据已发送完成，触发回调
 			if (remaining == 0 && sentCallback_)
 			{
 				sentCallback_(shared_from_this());
@@ -203,11 +204,13 @@ void Connection::HandleRead()
 	if (n > 0)
 	{
 		last_time_ = TimeStamp::Now();
-		// LOG_INFO << "Read " << n << " bytes from fd " << fd();
+
 		if (messageCallback_)
 		{
 			messageCallback_(shared_from_this(), &input_buffer_);
 		}
+		// 在消息处理完后清空buffer
+		input_buffer_.RetrieveAll();
 	}
 	else if (n == 0)
 	{
@@ -216,7 +219,7 @@ void Connection::HandleRead()
 	else
 	{
 		LOG_ERROR << "ReadFd error: " << strerror(savedErrno);
-		HandleError(); // 添加错误处理调用
+		HandleError();
 	}
 }
 
@@ -265,7 +268,6 @@ void Connection::HandleClose()
 {
 	// HandleClose只能在Connection对象还活着的时候调用
 	// 即只能通过shared_ptr调用,不能在析构函数中调用
-	
 
 	SetState(StateE::kDisconnected);
 	channel_->Remove();
