@@ -39,13 +39,10 @@
 # 1. 编译项目
 make
 
-# 2. 创建必要目录
-mkdir -p logs www/upload
-
-# 3. 运行HTTP服务器（端口8888）
+# 2. 运行HTTP服务器（端口8888）
 ./server
 
-# 4. 运行WebSocket服务器（端口9999）
+# 3. 运行WebSocket服务器（端口9999）
 ./WS_Server
 ```
 ## MySQL数据库配置

@@ -6,7 +6,7 @@ CXXFLAGS = -std=c++20 -Wall -Wextra -O2 -g
 BUILD_DIR = build
 OBJ_DIR = $(BUILD_DIR)/obj
 BIN_DIR = $(BUILD_DIR)/bin
-
+LOG_DIR=logs
 # 版本信息
 VERSION = 1.0.0
 
@@ -47,6 +47,7 @@ all: init $(HTTP_TARGET) $(WS_TARGET)
 # 初始化目录
 init:
 	@mkdir -p $(BUILD_DIR)
+	@mkdir -p $(LOG_DIR)
 	@mkdir -p $(OBJ_DIR)
 	@mkdir -p $(BIN_DIR)
 	@mkdir -p $(OBJ_DIR)/tcp
