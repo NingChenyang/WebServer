@@ -147,6 +147,7 @@ bool HttpContext::ParseRequest(Buffer *buf, TimeStamp eceiveTime)
                 int len = buf->ReadableBytes();
                 if (len)
                 {
+                    
                     request_.SetQuery(buf->Peek(), buf->BeginWrite());
                     buf->Retrieve(len);
                 }
@@ -194,7 +195,7 @@ bool HttpContext::ParseRequest(Buffer *buf, TimeStamp eceiveTime)
                 if (question != space)
                 {
                     request_.SetPath(begin, question);
-                    request_.SetQuery(question, space);
+                    request_.SetQuery(question+1, space);
                 }
                 else
                 {

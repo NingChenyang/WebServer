@@ -19,3 +19,5 @@
 void handleLoginRequest(const HttpRequest &req, HttpResponse *resp);
 void HandleRegisterRequest(const HttpRequest &req, HttpResponse *resp);
 void HandleLogoutRequest(const HttpRequest &req, HttpResponse *resp); // 新增
+void handleGetChatRooms(const HttpRequest &req, HttpResponse *resp);
+void handleGetMessages(const HttpRequest &req, HttpResponse *resp);

@@ -44,9 +44,22 @@ const CHUNK_SIZE = 16384; // 16KB
 function connectWebSocket() {
     ws = new WebSocket('ws://172.21.211.240:9999');
 
+    // 添加心跳定时器
+    let heartbeatInterval;
+
     ws.onopen = () => {
         console.log('WebSocket连接已建立');
         isConnected = true;
+
+        // 启动心跳
+        heartbeatInterval = setInterval(() => {
+            if (isConnected) {
+                ws.send(JSON.stringify({
+                    type: 'heartbeat',
+                    timestamp: new Date().getTime()
+                }));
+            }
+        }, 30000); // 每30秒发送一次心跳
 
         // 如果有未发送的消息，重新开始处理队列
         if (messageQueue.length > 0) {
@@ -59,13 +72,18 @@ function connectWebSocket() {
             ws.send(JSON.stringify({
                 type: 'join',
                 username: userInfo.username,
-                room: '公共大厅'
+                room: currentRoom
             }));
         }
     };
 
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        // 处理心跳响应
+        if (data.type === 'heartbeat_ack') {
+            console.log('收到心跳响应');
+            return;
+        }
         // 只显示类型为 'message' 的消息
         if (data.type === 'message') {
             displayMessage(data);
@@ -75,6 +93,10 @@ function connectWebSocket() {
     ws.onclose = () => {
         console.log('WebSocket连接已关闭');
         isConnected = false;
+        // 清除心跳定时器
+        if (heartbeatInterval) {
+            clearInterval(heartbeatInterval);
+        }
         // 尝试重新连接
         setTimeout(connectWebSocket, 3000);
     };
@@ -82,6 +104,10 @@ function connectWebSocket() {
     ws.onerror = (error) => {
         console.error('WebSocket错误:', error);
         isConnected = false;
+        // 清除心跳定时器
+        if (heartbeatInterval) {
+            clearInterval(heartbeatInterval);
+        }
     };
 }
 
@@ -298,12 +324,114 @@ function formatTime(timestamp) {
     }
 }
 
-function loadRoomMessages(roomName) {
-    // 这里添加实际的房间消息加载逻辑
-    console.log(`切换到房间: ${roomName}`);
+// 在文件顶部添加
+let currentRoom = '公共大厅'; // 当前聊天室
+
+// 修改DOMContentLoaded部分
+document.addEventListener('DOMContentLoaded', () => {
+    userManager.checkLogin();
+    connectWebSocket();
+
+    // 初始化获取聊天室列表
+    fetchChatRooms();
+
+    const sendBtn = document.getElementById('sendBtn');
+    const messageInput = document.getElementById('messageInput');
+
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    // 修复聊天室切换
+    const roomItems = document.querySelectorAll('.room-item');
+    roomItems.forEach(item => {
+        item.addEventListener('click', function () {
+            // 移除之前的active类
+            roomItems.forEach(room => room.classList.remove('active'));
+            // 添加新的active类
+            this.classList.add('active');
+
+            // 更新聊天室标题
+            const roomName = this.textContent.trim();
+            updateRoomTitle(roomName);
+            loadRoomMessages(roomName);
+        });
+    });
+});
+
+// 添加获取聊天室列表函数
+// 修改后的获取聊天室列表请求
+async function fetchChatRooms() {
+    try {
+        const userInfo = userManager.getUserInfo();
+        const response = await fetch(`/api/chatrooms?username=${encodeURIComponent(userInfo.username)}`);
+        const result = await response.json();
+        if (result.success) {
+            renderRoomList(result.data); // ✅ 访问data字段
+        } else {
+            console.error('请求失败:', result.message);
+        }
+
+    } catch (error) {
+        console.error('获取聊天室列表失败:', error);
+    }
 }
 
-function updateRoomTitle(roomName) {
-    const header = document.querySelector('.chat-header h2');
-    header.innerHTML = `<i class="fas fa-hashtag"></i> ${roomName}`;
+// 渲染聊天室列表
+// 修改渲染房间列表函数
+function renderRoomList(rooms) {
+    const roomList = document.getElementById('roomList');
+    roomList.innerHTML = '';
+
+    rooms.forEach(room => {
+        const li = document.createElement('li');
+        // 修改类名判断逻辑
+        li.className = `room-item ${room === currentRoom ? 'active' : ''}`; // 直接比较字符串
+        li.innerHTML = `<i class="fas fa-hashtag"></i> ${room}`; // 直接使用字符串值
+        li.addEventListener('click', () => switchRoom(room));
+        roomList.appendChild(li);
+    });
+}
+
+// 修改房间切换判断逻辑
+function switchRoom(roomName) {
+    if (roomName === currentRoom) return;
+
+    currentRoom = roomName;
+    updateRoomTitle(roomName);
+    clearMessages();
+    loadRoomMessages(roomName);
+
+    // 更新活动状态
+    document.querySelectorAll('.room-item').forEach(item => {
+        // 修改判断逻辑
+        item.classList.toggle('active', item.textContent.trim() === roomName);
+    });
+
+    // 通知服务器切换房间
+    if (isConnected) {
+        const userInfo = userManager.getUserInfo();
+        ws.send(JSON.stringify({
+            type: 'switch',
+            username: userInfo.username,
+            room: roomName
+        }));
+    }
+}
+
+// 清空消息容器
+function clearMessages() {
+    document.getElementById('messageContainer').innerHTML = '';
+}
+
+// 修改loadRoomMessages函数
+async function loadRoomMessages(roomName) {
+    try {
+        const response = await fetch(`/api/messages?room=${encodeURIComponent(roomName)}`);
+        const messages = await response.json();
+        messages.forEach(displayCompleteMessage);
+    } catch (error) {
+        console.error('加载消息失败:', error);
+    }
 }

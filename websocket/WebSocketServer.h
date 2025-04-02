@@ -9,9 +9,11 @@
 #include <condition_variable>
 #include <functional>
 #include "../tcp/Server.h"
+#include "../mysql/MysqlConnPool.h"
 #include"WebSocketPacket.h"
 #include"WebSocketContext.h"
 #include"../http/HttpContext.h"
+#include"Room.h"
 class WebSocketContext;
 class HttpRequest;
 class HttpResponse;
@@ -26,6 +28,14 @@ public:
     void Start(const std::string &ip, uint16_t port);
     void Stop();
     void SetWebsocketCallback(WebsocketCallback callback);
+
+    void JoinRoom(const ConnectionPtr &conn, const std::string &room_name);
+    void LeaveRoom(const ConnectionPtr &conn, const std::string &room_name);
+    void BroadcastMessage(const std::string &room_name, const std::string &message);
+    void ChatMessage(const ConnectionPtr &conn, const std::string &message);
+
+
+
 private:
 void HandleNewConnection(const ConnectionPtr &conn);
     void HandleMessage(const ConnectionPtr &conn, Buffer *buf);
@@ -36,4 +46,7 @@ void HandleNewConnection(const ConnectionPtr &conn);
     Server server_;
     WebsocketCallback websocket_callback_;
     ThreadPool worker_pool_;
+
+    // 房间列表
+    std::unordered_map<std::string, std::shared_ptr<Room>> rooms_;
 };

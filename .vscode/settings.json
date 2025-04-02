@@ -121,7 +121,8 @@
     "set": "cpp",
     "filesystem": "cpp",
     "bitset": "cpp",
-    "regex": "cpp"
+    "regex": "cpp",
+    "unordered_set": "cpp"
   },
   // "C_Cpp.errorSquiggles": "disabled",
   "C_Cpp_Runner.msvcWarnings": [

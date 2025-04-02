@@ -10,4 +10,6 @@ static const std::unordered_map<std::string, std::function<void(const HttpReques
     {"/api/login", handleLoginRequest},
     {"/api/register", HandleRegisterRequest},
     {"/api/logout", HandleLogoutRequest}};
-
+static const std::unordered_map<std::string, std::function<void(const HttpRequest &, HttpResponse *)>> getRoutes = {
+    {"/api/chatrooms", handleGetChatRooms},
+    {"/api/messages", handleGetMessages}};

@@ -2,7 +2,10 @@
 #include "log/Logger.h"
 #include <signal.h>
 #include <iostream>
-
+#include <string>
+#include "websocket/Room.h"
+#include "jsoncpp/json/json.h"
+#include "mysql/MysqlConnPool.h"
 // 全局指针用于信号处理
 WebSocketServer *g_server = nullptr;
 std::string Logger::log_file_basename_ = "./logs/ws_server"; // 修改日志路径为相对路径
@@ -19,11 +22,55 @@ void SignalHandler(int sig)
 
 void onMessage(const Buffer *input, Buffer *output)
 {
-    // 自定义消息处理逻辑
-    // 这里实现echo功能：接收到什么就返回什么
     std::string msg(input->Peek(), input->ReadableBytes());
-    std::cout << "收到消息: " << msg << std::endl;
-    output->Append(input->Peek(), input->ReadableBytes());
+
+    // 解析JSON消息
+    Json::Value jsonMsg;
+    Json::Reader reader;
+    if (!reader.parse(msg, jsonMsg))
+    {
+        LOG_ERROR << "JSON解析失败";
+        return;
+    }
+
+    std::string msgType = jsonMsg["type"].asString();
+
+    // 处理心跳消息
+    if (msgType == "heartbeat")
+    {
+        Json::Value response;
+        response["type"] = "heartbeat_ack";
+        response["timestamp"] = jsonMsg["timestamp"];
+
+        std::string responseStr = response.toStyledString();
+        output->Append(responseStr.c_str(), responseStr.length());
+        return;
+    }
+
+    if (msgType == "message")
+    {
+        handleChatMessage(jsonMsg, output);
+    }
+    else if (msgType == "join")
+    {
+        handleJoinRoom(jsonMsg, output);
+    }
+    else if (msgType == "leave")
+    {
+        handleLeaveRoom(jsonMsg, output);
+    }
+    else if (msgType == "create_room")
+    {
+        handleCreateRoom(jsonMsg, output);
+    }
+    else if (msgType == "user_list")
+    {
+        handleUserList(jsonMsg, output);
+    }
+    else
+    {
+        LOG_WARN << "未知的消息类型: " << msgType;
+    }
 }
 
 int main()
@@ -43,9 +90,15 @@ int main()
         // 创建服务器地址
         InetAddress listenAddr("0.0.0.0", 9999);
 
-        // 创建WebSocket服务器 (IO线程数=4, 工作线程数=4)
+        // 创建WebSocket服务器 (IO线程数=2, 工作线程数=2)
         WebSocketServer server(listenAddr, 2, 2);
         g_server = &server;
+
+        // // 设置连接保活参数
+        // server.SetKeepAlive(true);
+        // server.SetKeepAliveIdle(60);     // 60秒无数据则发送探测包
+        // server.SetKeepAliveInterval(30); // 探测包发送间隔30秒
+        // server.SetKeepAliveCount(3);     // 最多发送3次探测包
 
         // 设置消息回调函数
         server.SetWebsocketCallback(onMessage);

@@ -44,6 +44,23 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
 
     if (req.GetMethod() == Method::kGet)
     {
+        auto it = getRoutes.find(path);
+        if (it != getRoutes.end())
+        {
+            // 检查Cookie是否存在
+            std::string cookie = req.GetHeader("Cookie");
+            if (cookie.find("auth_token=valid") == std::string::npos)
+            {
+                // 未授权访问,重定向到登录页
+                resp->SetStatusCode(HttpStatusCode::k302Found);
+                resp->SetStatusMessage("Found");
+                resp->AddHeader("Location", "/login.html");
+                resp->SetBody("");
+                return;
+            }
+            it->second(req, resp);
+            return;
+        }
         if (path == "/")
         {
             path = "/login.html";

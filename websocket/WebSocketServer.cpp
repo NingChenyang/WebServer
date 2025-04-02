@@ -14,6 +14,25 @@ WebSocketServer::WebSocketServer(InetAddress &serv_addr, int io_thread_nums, int
     server_.SetOnMessageCallback(std::bind(&WebSocketServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
     server_.SetOnSentCallback(std::bind(&WebSocketServer::HandleSent, this, std::placeholders::_1));
     server_.SetOnClosedCallback(std::bind(&WebSocketServer::HandleClose, this, std::placeholders::_1));
+    // 暂时的初始化房间列表
+    MysqlConnPool *pool = MysqlConnPool::GetInstance();
+    auto mysqlconn = pool->GetConn();
+    if (!mysqlconn)
+    {
+        LOG_ERROR << "Failed to get MySQL connection";
+    }
+    else
+    {
+        std::string sql = "SELECT id, name FROM rooms";
+        auto result = mysqlconn->Query(sql);
+        while(mysqlconn->Next())
+        {
+            int id = std::stoi(mysqlconn->Value(0));
+            std::string name = mysqlconn->Value(1);
+            auto room=std::make_shared<Room>(id, name);
+            rooms_[name] = room;
+        }
+    }
 }
 
 WebSocketServer::~WebSocketServer()

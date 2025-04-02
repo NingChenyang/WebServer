@@ -1,4 +1,24 @@
 #include "handle.h"
+// 在文件顶部添加查询参数解析函数
+std::unordered_map<std::string, std::string> ParseQueryParams(const std::string &query)
+{
+    std::unordered_map<std::string, std::string> params;
+    std::istringstream iss(query);
+    std::string pair;
+
+    while (std::getline(iss, pair, '&'))
+    {
+        size_t eq_pos = pair.find('=');
+        if (eq_pos != std::string::npos)
+        {
+            std::string key = pair.substr(0, eq_pos);
+            std::string value = pair.substr(eq_pos + 1);
+            // URL解码（此处需要实现解码逻辑）
+            params[key] = value;
+        }
+    }
+    return params;
+}
 void handleLoginRequest(const HttpRequest &req, HttpResponse *resp)
 {
     try
@@ -137,6 +157,7 @@ void HandleRegisterRequest(const HttpRequest &req, HttpResponse *resp)
 }
 
 void HandleLogoutRequest(const HttpRequest &req, HttpResponse *resp)
+
 {
     try
     {
@@ -161,4 +182,79 @@ void HandleLogoutRequest(const HttpRequest &req, HttpResponse *resp)
 
         LOG_ERROR << "Logout error: " << e.what();
     }
+}
+// 添加处理函数
+// 修改后的获取聊天室函数
+void handleGetChatRooms(const HttpRequest &req, HttpResponse *resp)
+{
+    try
+    {
+        // 从查询参数获取用户名
+        auto params = ParseQueryParams(req.GetQuery());
+        auto it = params.find("username");
+        if (it == params.end())
+        {
+            throw std::runtime_error("需要提供用户名参数");
+        }
+        std::string username = it->second;
+        MysqlConnPool *pool = MysqlConnPool::GetInstance();
+        auto conn = pool->GetConn();
+        if (!conn)
+        {
+            throw std::runtime_error("数据库连接失败");
+        }
+
+        // 关联查询用户加入的聊天室
+        std::string sql =
+            "SELECT cr.name FROM chatroom_members cm "
+            "JOIN rooms cr ON cm.chatroom_id = cr.id "
+            "JOIN users u ON cm.user_id = u.id "
+            "WHERE u.username = '" +
+            username + "'";
+
+        auto result = conn->Query(sql);
+        Json::Value rooms;
+
+        while (conn->Next())
+        {
+            Json::Value m = conn->Value(0);
+            rooms.append(m.asString()); // 获取房间名称
+        }
+
+        resp->SetStatusCode(HttpStatusCode::k200Ok);
+        resp->SetContentType("application/json");
+        
+        // 应该改为
+        Json::Value response;
+        response["success"] = true;
+        response["data"] = rooms;  // ✅ 包裹标准响应格式
+                                   // 最优输出方案
+        Json::StreamWriterBuilder writer;
+        // writer["indentation"] = "";                              // 紧凑格式（去掉换行和缩进）
+        writer["emitUTF8"] = true;                               // 保留中文
+        resp->SetContentType("application/json; charset=utf-8"); // 显式声明编码
+        resp->SetBody(Json::writeString(writer, response));
+    }
+    catch (const std::exception &e)
+    {
+        Json::Value response;
+        response["success"] = false;
+        response["message"] = e.what();
+
+        resp->SetStatusCode(HttpStatusCode::k400BadRequest);
+        resp->SetContentType("application/json");
+        resp->SetBody(Json::FastWriter().write(response));
+    }
+}
+
+void handleGetMessages(const HttpRequest &req, HttpResponse *resp)
+{
+    // std::string room = req.GetQuery("room");
+    // // 这里根据room从数据库获取消息
+    // Json::Value messages;
+    // // 示例数据 - 实际应从数据库查询
+
+    // resp->SetStatusCode(HttpStatusCode::k200Ok);
+    // resp->SetContentType("application/json");
+    // resp->SetBody(Json::FastWriter().write(messages));
 }

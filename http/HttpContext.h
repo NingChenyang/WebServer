@@ -1,4 +1,7 @@
 #pragma once
+#include<iostream>
+#include<algorithm>
+#include<string>
 #include"HttpUtil.h"
 #include"HttpRequest.h"
 #include"../tcp/Buffer.h"
