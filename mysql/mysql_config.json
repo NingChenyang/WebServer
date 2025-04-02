@@ -3,7 +3,7 @@
     "port": 3307,
     "user": "admin",
     "passwd": "Admin5932!",
-    "db": "test",
+    "db": "chatserver",
     "min_conn": 100,
     "max_conn": 1024,
     "max_idle_time": 5000,

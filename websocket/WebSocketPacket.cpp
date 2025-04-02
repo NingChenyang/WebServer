@@ -32,164 +32,114 @@ void WebSocketPacket::DecodeFrame(Buffer *frameBuf, Buffer *output)
 {
     const char *data = frameBuf->Peek();
     int pos = 0;
+
+    // 确保至少有2字节可读
+    if (frameBuf->ReadableBytes() < 2)
+    {
+        return;
+    }
+
     fin_ = (data[pos] >> 7) & 0x01;
     rsv1_ = (data[pos] >> 6) & 0x01;
     rsv2_ = (data[pos] >> 5) & 0x01;
     rsv3_ = (data[pos] >> 4) & 0x01;
     opcode_ = (data[pos] & 0x0F);
     pos++;
+
     mask_ = (data[pos] >> 7) & 0x01;
     payload_length_ = (data[pos] & 0x7F);
     pos++;
 
-    // 数据长度，如果使用额外的字节需要进行大端（网络字节序）转小端
+    // 处理扩展长度
+    uint64_t length = payload_length_;
     if (payload_length_ == 126)
     {
-        uint16_t length = 0;
-        memcpy(&length, data + pos, 2);
+        if (frameBuf->ReadableBytes() < pos + 2)
+        {
+            return;
+        }
+        uint16_t len16;
+        memcpy(&len16, data + pos, 2);
+        length = ntohs(len16);
         pos += 2;
-        payload_length_ = ntohs(length);
     }
     else if (payload_length_ == 127)
     {
-        uint64_t length = 0;
-        memcpy(&length, data + pos, 8);
+        if (frameBuf->ReadableBytes() < pos + 8)
+        {
+            return;
+        }
+        uint64_t len64;
+        memcpy(&len64, data + pos, 8);
+        length = be64toh(len64); // 使用网络字节序转换
         pos += 8;
-        payload_length_ = ((uint64_t)data[0] << 56) |
-                          ((uint64_t)data[1] << 48) |
-                          ((uint64_t)data[2] << 40) |
-                          ((uint64_t)data[3] << 32) |
-                          ((uint64_t)data[4] << 24) |
-                          ((uint64_t)data[5] << 16) |
-                          ((uint64_t)data[6] << 8) |
-                          ((uint64_t)data[7]);
     }
 
-    // 获取mask
-    if (mask_ == 1)
+    // 检查剩余数据是否足够
+    if (frameBuf->ReadableBytes() < pos + (mask_ ? 4 : 0) + length)
     {
-        for (int i = 0; i < 4; i++)
-        {
-            masking_key_[i] = data[pos + i];
-        }
-        pos += 4;
+        return;
     }
-    if (mask_ == 1)
+
+    // 处理掩码
+    if (mask_)
     {
-        for (uint64_t i = 0; i < payload_length_; i++)
+        memcpy(masking_key_, data + pos, 4);
+        pos += 4;
+
+        // 解码数据
+        std::vector<char> decoded(length);
+        for (uint64_t i = 0; i < length; i++)
         {
-            output->Append(data[pos + i] ^ masking_key_[i % 4], payload_length_);
+            decoded[i] = data[pos + i] ^ masking_key_[i % 4];
         }
+
+        output->Append(decoded.data(), length);
     }
     else
     {
-        output->Append(data + pos, payload_length_);
+        output->Append(data + pos, length);
     }
+
+    // 更新缓冲区位置
+    frameBuf->Retrieve(pos + length);
 }
 
 void WebSocketPacket::EncodeFrame(Buffer *output, Buffer *data) const
 {
     uint8_t byte1 = 0 | (fin_ << 7) | (rsv1_ << 6) | (rsv2_ << 5) | (rsv3_ << 4) | (opcode_ & 0x0F);
     output->Append((char *)&byte1, 1);
+
     uint8_t byte2 = 0 | (mask_ << 7);
-    int length = data->ReadableBytes();
-    //处理长度
+    uint64_t length = data->ReadableBytes();
+
+    if (length < 126)
+    {
         byte2 |= length;
         output->Append((char *)&byte2, 1);
-     if (length == 126)
+    }
+    else if (length <= 65535)
     {
-        
+        byte2 |= 126;
+        output->Append((char *)&byte2, 1);
         uint16_t len16 = htons(length);
         output->Append((char *)&len16, 2);
     }
-    else if(length ==127)
+    else
     {
-        
-        
-
-        //进行64位小端转大端
-        byte2 = (payload_length_ >> 56) & 0xFF;
+        byte2 |= 127;
         output->Append((char *)&byte2, 1);
-        byte2 = (payload_length_ >> 48) & 0xFF;
-        output->Append((char *)&byte2, 1);  
-        byte2 = (payload_length_ >> 40) & 0xFF;
-        output->Append((char *)&byte2, 1);
-        byte2 = (payload_length_ >> 32) & 0xFF;
-        output->Append((char *)&byte2, 1);
-        byte2 = (payload_length_ >> 24) & 0xFF;
-        output->Append((char *)&byte2, 1);
-        byte2 = (payload_length_ >> 16) & 0xFF;
-        output->Append((char *)&byte2, 1);
-        byte2 = (payload_length_ >> 8) & 0xFF;
-        output->Append((char *)&byte2, 1);
-        byte2 = (payload_length_ >> 0) & 0xFF;
-        output->Append((char *)&byte2, 1);
+        uint64_t len64 = htobe64(length); // 使用网络字节序
+        output->Append((char *)&len64, 8);
     }
 
-    //服务端不会发送带有mask_key的帧
+    // 添加数据部分
     if (mask_ == 1)
     {
-        
+        // 服务端一般不需要mask
     }
     else
     {
         output->Append(data->Peek(), data->ReadableBytes());
-    }
-}
-
-void WebSocketPacket::AddFrameHeader(Buffer *output)
-{
-    payload_length_ = output->ReadableBytes() - 14;
-
-    uint8_t onebyte = 0;
-    onebyte |= (fin_ << 7);
-    onebyte |= (rsv1_ << 6);
-    onebyte |= (rsv2_ << 5);
-    onebyte |= (rsv3_ << 4);
-    onebyte |= (opcode_ & 0x0F);
-
-    output->Append((char *)&onebyte, 1);
-
-    onebyte = 0;
-    // set mask flag
-    onebyte = onebyte | (mask_ << 7);
-
-    int length = payload_length_;
-
-    if (length < 126)
-    {
-        onebyte |= length;
-        output->Append((char *)&onebyte, 1);
-    }
-    else if (length == 126)
-    {
-        onebyte |= length;
-        output->Append((char *)&onebyte, 1);
-
-        auto len = htons(length);
-        output->Append((char *)&len, 2);
-    }
-    else if (length == 127)
-    {
-        onebyte |= length;
-        output->Append((char *)&onebyte, 1);
-
-        // also can use htonll if you have it
-        onebyte = (payload_length_ >> 56) & 0xFF;
-        output->Append((char *)&onebyte, 1);
-        onebyte = (payload_length_ >> 48) & 0xFF;
-        output->Append((char *)&onebyte, 1);
-        onebyte = (payload_length_ >> 40) & 0xFF;
-        output->Append((char *)&onebyte, 1);
-        onebyte = (payload_length_ >> 32) & 0xFF;
-        output->Append((char *)&onebyte, 1);
-        onebyte = (payload_length_ >> 24) & 0xFF;
-        output->Append((char *)&onebyte, 1);
-        onebyte = (payload_length_ >> 16) & 0xFF;
-        output->Append((char *)&onebyte, 1);
-        onebyte = (payload_length_ >> 8) & 0xFF;
-        output->Append((char *)&onebyte, 1);
-        onebyte = payload_length_ & 0XFF;
-        output->Append((char *)&onebyte, 1);
     }
 }

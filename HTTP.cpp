@@ -7,7 +7,7 @@
 #include "mysql/MysqlConnPool.h"
 #include <signal.h>
 #include "jsoncpp/json/json.h"
-#include "handle.h"
+#include "routes.hpp"
 extern const std::string ROOT_DIR = ".";                   // 定义网站根目录
 std::string Logger::log_file_basename_ = "../logs/server"; // 修改默认日志路径
 
@@ -31,21 +31,13 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
     std::string path = req.GetPath();
 
     // 处理API请求
+    // 修改后的处理逻辑
     if (req.GetMethod() == Method::kPost)
     {
-        if (path == "/api/login")
+        auto it = postRoutes.find(path);
+        if (it != postRoutes.end())
         {
-            handleLoginRequest(req, resp);
-            return;
-        }
-        else if (path == "/api/register")
-        {
-            HandleRegisterRequest(req, resp);
-            return;
-        }
-        else if (path == "/api/logout") // 新增
-        {
-            HandleLogoutRequest(req, resp);
+            it->second(req, resp);
             return;
         }
     }
@@ -54,10 +46,10 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
     {
         if (path == "/")
         {
-            path = "/index.html";
+            path = "/login.html";
         }
         // 对home.html进行访问控制
-        if (path != "/index.html"&&path.ends_with(".html"))
+        if (path != "/login.html"&&path.ends_with(".html"))
         {
             // 检查Cookie是否存在
             std::string cookie = req.GetHeader("Cookie");
@@ -66,7 +58,7 @@ void onRequest(const HttpRequest &req, HttpResponse *resp)
                 // 未授权访问,重定向到登录页
                 resp->SetStatusCode(HttpStatusCode::k302Found);
                 resp->SetStatusMessage("Found");
-                resp->AddHeader("Location", "/index.html");
+                resp->AddHeader("Location", "/login.html");
                 resp->SetBody("");
                 return;
 
@@ -121,7 +113,7 @@ int main()
 
     try
     {
-        std::filesystem::current_path("./www");
+        std::filesystem::current_path("./ws");
         InetAddress listenAddr("0.0.0.0", 8888); // 修改监听地址为0.0.0.0，接受所有网卡的连接
         HttpServer server(listenAddr, 1, 1);
         server.SetHttpCallback(onRequest);

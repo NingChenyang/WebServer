@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>个人中心 - 苦力怕聊天室</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="container profile-container">
+        <header class="profile-header">
+            <h1>用户信息中心</h1>
+            <nav>
+                <button class="btn btn-home" onclick="location.href='home.html'">主页</button>
+                <button class="btn btn-chat" onclick="location.href='chat.html'">聊天室</button>
+                <button class="btn btn-logout" id="logoutBtn">退出登录</button>
+            </nav>
+        </header>
+
+        <div class="profile-content">
+            <div class="info-card">
+                <h2><i class="icon-user"></i> 基本信息</h2>
+                <div class="info-item">
+                    <label>用户名：</label>
+                    <span id="username">Guest</span>
+                </div>
+                <div class="info-item">
+                    <label>邮箱：</label>
+                    <span id="email">guest@example.com</span>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h2><i class="icon-lock"></i> 安全设置</h2>
+                <div class="info-item">
+                    <label>密码：</label>
+                    <span>********</span>
+                    <button class="btn btn-primary">修改密码</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/userManager.js"></script>
+    <script src="js/usermsg.js"></script>
+</body>
+
+</html>

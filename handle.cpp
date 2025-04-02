@@ -3,7 +3,6 @@ void handleLoginRequest(const HttpRequest &req, HttpResponse *resp)
 {
     try
     {
-        // 解析请求体
         Json::Value root;
         Json::Reader reader;
         if (!reader.parse(req.GetQuery(), root))
@@ -14,58 +13,39 @@ void handleLoginRequest(const HttpRequest &req, HttpResponse *resp)
         std::string username = root["username"].asString();
         std::string password = root["password"].asString();
 
-        // 这里添加实际的登录验证逻辑
-        bool loginSuccess = false;
-        std::string message = "登录失败";
-
-        // 示例验证（请替换为实际的验证逻辑）
         MysqlConnPool *pool = MysqlConnPool::GetInstance();
         auto conn = pool->GetConn();
         if (conn)
         {
-            std::string sql = "SELECT * FROM user WHERE username='" + username + "' AND password='" + password + "'";
+            std::string sql = "SELECT id, username, email FROM users WHERE username='" + username + "' AND password='" + password + "'";
             auto result = conn->Query(sql);
-            if (result)
+            if (result && conn->Next())
             {
-                loginSuccess = true;
-                message = "登录成功";
+                // 构造用户信息JSON响应
+                Json::Value response;
+                response["success"] = true;
+                response["message"] = "登录成功";
+
+                Json::Value userInfo;
+                userInfo["id"] = conn->Value(0);       // 用户ID
+                userInfo["username"] = conn->Value(1); // 用户名
+                userInfo["email"] = conn->Value(2);    // 邮箱
+                response["data"] = userInfo;
+
+                resp->SetStatusCode(HttpStatusCode::k200Ok);
+                resp->SetStatusMessage("OK");
+                resp->SetContentType("application/json");
+                resp->AddHeader("Set-Cookie", "auth_token=valid; Path=/; HttpOnly; SameSite=Strict; Max-Age=3600");
+                resp->SetBody(response.toStyledString());
             }
             else
             {
-                loginSuccess = false;
-                message = "用户名或密码错误";
+                throw std::runtime_error("用户名或密码错误");
             }
         }
         else
         {
-            message = "数据库连接失败";
-        }
-
-        // resp->SetStatusCode(HttpStatusCode::k200Ok);
-        // resp->SetStatusMessage("OK");
-        // resp->SetContentType("application/json");
-        // resp->SetBody(response.toStyledString());
-        if (loginSuccess)
-        {
-            // 登录成功返回302重定向
-            resp->SetStatusCode(HttpStatusCode::k302Found);
-            resp->SetStatusMessage("Found");
-            resp->AddHeader("Location", "/home.html");
-            resp->AddHeader("Set-Cookie", "auth_token=valid; Path=/; HttpOnly; SameSite=Strict; Max-Age=3600");
-
-            resp->SetBody(""); // 重定向响应可以不需要响应体
-        }
-        else
-        {
-            // 登录失败返回JSON响应
-            Json::Value response;
-            response["success"] = false;
-            response["message"] = message;
-
-            resp->SetStatusCode(HttpStatusCode::k200Ok);
-            resp->SetStatusMessage("OK");
-            resp->SetContentType("application/json");
-            resp->SetBody(response.toStyledString());
+            throw std::runtime_error("数据库连接失败");
         }
     }
     catch (const std::exception &e)
@@ -85,7 +65,6 @@ void HandleRegisterRequest(const HttpRequest &req, HttpResponse *resp)
 {
     try
     {
-        // 解析 JSON 请求体
         Json::Value root;
         Json::Reader reader;
         if (!reader.parse(req.GetQuery(), root))
@@ -97,7 +76,6 @@ void HandleRegisterRequest(const HttpRequest &req, HttpResponse *resp)
         std::string email = root["email"].asString();
         std::string password = root["password"].asString();
 
-        // 数据库连接
         MysqlConnPool *pool = MysqlConnPool::GetInstance();
         auto conn = pool->GetConn();
 
@@ -107,35 +85,50 @@ void HandleRegisterRequest(const HttpRequest &req, HttpResponse *resp)
         }
 
         // 检查用户名是否已存在
-        std::string checkSql = "SELECT id FROM user WHERE username='" + username + "'";
+        std::string checkSql = "SELECT id FROM users WHERE username='" + username + "'";
         conn->Query(checkSql);
         conn->Next();
         if (conn->Value(0) != "")
         {
             throw std::runtime_error("用户名已存在");
         }
+
         // 插入新用户
-        std::string insertSql = "INSERT INTO user (username, password) VALUES ('" + username + "', '" + password + "')";
+        std::string insertSql = "INSERT INTO users (username, email, password) VALUES ('" +
+                                username + "', '" + email + "', '" + password + "')";
 
         if (!conn->Update(insertSql))
         {
             throw std::runtime_error("注册失败，请重试");
         }
 
-        // 注册成功响应
-        resp->SetStatusCode(HttpStatusCode::k302Found);
-        resp->SetStatusMessage("Found");
-        resp->AddHeader("Location", "/index.html");
+        // 获取新注册用户的信息
+        std::string getUserSql = "SELECT id, username, email FROM users WHERE username='" + username + "'";
+        conn->Query(getUserSql);
+        conn->Next();
 
-        resp->SetBody(""); // 清空响应体
+        // 构造成功响应
+        Json::Value response;
+        response["success"] = true;
+        response["message"] = "注册成功";
+
+        Json::Value userInfo;
+        userInfo["id"] = conn->Value(0);
+        userInfo["username"] = conn->Value(1);
+        userInfo["email"] = conn->Value(2);
+        response["data"] = userInfo;
+
+        resp->SetStatusCode(HttpStatusCode::k200Ok);
+        resp->SetStatusMessage("OK");
+        resp->SetContentType("application/json");
+        resp->SetBody(response.toStyledString());
     }
     catch (const std::exception &e)
     {
-        // 错误处理
         Json::Value response;
         response["success"] = false;
         response["message"] = e.what();
-        std::cout << "error: " << e.what() << std::endl;
+
         resp->SetStatusCode(HttpStatusCode::k400BadRequest);
         resp->SetStatusMessage("Bad Request");
         resp->SetContentType("application/json");
@@ -150,7 +143,7 @@ void HandleLogoutRequest(const HttpRequest &req, HttpResponse *resp)
         // 设置过期的 cookie 来清除认证
         resp->SetStatusCode(HttpStatusCode::k302Found);
         resp->SetStatusMessage("Found");
-        resp->AddHeader("Location", "/index.html");
+        resp->AddHeader("Location", "/login.html");
         // 设置立即过期的 cookie
         resp->AddHeader("Set-Cookie", "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly; SameSite=Strict");
         resp->SetBody("");

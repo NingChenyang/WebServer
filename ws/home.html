@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>主页 - 苦力怕聊天室</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+
+<body>
+    <div class="container dashboard-container">
+        <div class="welcome-section">
+            <div class="welcome-content">
+                <h1>欢迎来到苦力怕聊天室</h1>
+                <p class="welcome-subtitle">开启您的即时通讯之旅</p>
+            </div>
+            <div class="user-info">
+                <div class="avatar-large">U</div>
+                <div class="user-details">
+                    <span id="currentUsername">Guest</span>
+                    <span class="user-status">在线</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="dashboard-card add-room-card" id="addRoomBtn">
+                <div class="card-icon"><i class="fas fa-plus-circle"></i></div>
+                <h2>创建聊天室</h2>
+                <p>创建新的话题讨论空间</p>
+                <div class="card-footer">
+                    <span class="card-stat">自定义聊天室</span>
+                    <button class="btn-enter">创建 <i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+
+            <div class="dashboard-card join-room-card" id="joinRoomBtn">
+                <div class="card-icon"><i class="fas fa-door-open"></i></div>
+                <h2>加入聊天室</h2>
+                <p>通过ID加入已有聊天室</p>
+                <div class="card-footer">
+                    <span class="card-stat">输入ID即可加入</span>
+                    <button class="btn-enter">加入 <i class="fas fa-sign-in-alt"></i></button>
+                </div>
+            </div>
+
+            <div class="dashboard-card" onclick="location.href='chat.html'">
+                <div class="card-icon"><i class="fas fa-comments"></i></div>
+                <h2>公共聊天室</h2>
+                <p>加入群聊，参与话题讨论</p>
+                <div class="card-footer">
+                    <span class="card-stat">在线 24 人</span>
+                    <button class="btn-enter">进入 <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <div class="dashboard-card" onclick="location.href='private-chat.html'">
+                <div class="card-icon"><i class="fas fa-envelope"></i></div>
+                <h2>私人消息</h2>
+                <p>与好友进行私密交谈</p>
+                <div class="card-footer">
+                    <span class="card-stat">2 条新消息</span>
+                    <button class="btn-enter">查看 <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <div class="dashboard-card" onclick="location.href='usermsg.html'">
+                <div class="card-icon"><i class="fas fa-user-circle"></i></div>
+                <h2>个人中心</h2>
+                <p>管理您的个人信息</p>
+                <div class="card-footer">
+                    <span class="card-stat">账号安全</span>
+                    <button class="btn-enter">设置 <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <div class="dashboard-card" id="logoutBtn">
+                <div class="card-icon"><i class="fas fa-sign-out-alt"></i></div>
+                <h2>退出登录</h2>
+                <p>安全退出系统</p>
+                <div class="card-footer">
+                    <span class="card-stat">已登录</span>
+                    <button class="btn-enter">退出 <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加聊天室模态框 -->
+    <div class="modal" id="addRoomModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>创建新聊天室</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <form id="addRoomForm" class="modal-form">
+                <div class="form-group">
+                    <label for="roomName">聊天室名称</label>
+                    <input type="text" id="roomName" required placeholder="给聊天室起个名字">
+                </div>
+                <div class="form-group">
+                    <label for="roomDesc">聊天室简介</label>
+                    <textarea id="roomDesc" rows="3" placeholder="描述一下聊天室的主题"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-cancel" id="cancelAdd">取消</button>
+                    <button type="submit" class="btn btn-primary">创建</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 加入聊天室模态框 -->
+    <div class="modal" id="joinRoomModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>加入聊天室</h2>
+                <button class="close-btn" id="closeJoinModal">&times;</button>
+            </div>
+            <form id="joinRoomForm" class="modal-form">
+                <div class="form-group">
+                    <label for="roomId">聊天室ID</label>
+                    <input type="text" id="roomId" required placeholder="请输入聊天室ID">
+                    <p class="form-tip">ID是聊天室的唯一标识，由创建者分享</p>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-cancel" id="cancelJoin">取消</button>
+                    <button type="submit" class="btn btn-primary">加入</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/userManager.js"></script>
+    <script src="js/home.js"></script>
+</body>
+
+</html>
