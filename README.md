@@ -48,7 +48,7 @@ make
 ```
 ## MySQL数据库配置
 在`config.json`文件中配置MySQL数据库连接信息：
-````json
+```json
 {
     "host": "localhost",
     "user": "webuser",
