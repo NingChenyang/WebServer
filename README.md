@@ -57,6 +57,9 @@ make
     "poolSize": 8,
     "timeout": 5
 }
+```
+## 数据库表结构
+````sql
 -- auto-generated definition
 create table messages
 (
