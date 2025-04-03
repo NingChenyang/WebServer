@@ -25,7 +25,7 @@ WEBSOCKET_SRCS := $(wildcard websocket/*.cpp)
 
 # 合并所有源文件
 ALL_SRCS = HTTP.cpp $(TCP_SRCS) $(HTTP_SRCS) $(LOG_SRCS) $(MYSQL_SRCS) $(JSON_SRCS) handle.cpp
-WS_SRCS = WS_Server.cpp $(WEBSOCKET_SRCS) $(TCP_SRCS) $(LOG_SRCS) $(HTTP_SRCS) $(MYSQL_SRCS) $(JSON_SRCS)
+WS_SRCS = WS_Server.cpp $(WEBSOCKET_SRCS) $(TCP_SRCS) $(LOG_SRCS) $(HTTP_SRCS) $(MYSQL_SRCS) $(JSON_SRCS) handle.cpp
 
 # 生成对应的.o文件列表
 ALL_OBJS = $(addprefix $(OBJ_DIR)/, $(patsubst %.cpp,%.o,$(ALL_SRCS)))

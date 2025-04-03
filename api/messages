@@ -1,0 +1,18 @@
+{
+    "success": true,
+    "data": [
+        {
+            "id": "User1-1696432012345",
+            "username": "User1",
+            "timestamp": "2023-10-06T12:34:56.789Z",
+            "content": "Hello, everyone!"
+        },
+        {
+            "id": "User2-1696432023456",
+            "username": "User2",
+            "timestamp": "2023-10-06T12:35:12.345Z",
+            "content": "Hi, User1!"
+        }
+    ],
+    "message": "历史消息加载成功"
+}

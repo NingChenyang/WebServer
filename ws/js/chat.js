@@ -101,7 +101,7 @@ function connectWebSocket() {
             processMessageQueue();
         }
 
-        // 发送加入房间信息
+        // 发送加入房间信息并加载历史消息
         const userInfo = userManager.getUserInfo();
         if (userInfo) {
             ws.send(JSON.stringify({
@@ -109,6 +109,7 @@ function connectWebSocket() {
                 username: userInfo.username,
                 room: currentRoom
             }));
+            loadRoomMessages(currentRoom); // 新增：加载当前房间历史记录
         }
     };
 
@@ -460,14 +461,27 @@ function clearMessages() {
     document.getElementById('messageContainer').innerHTML = '';
 }
 
-// 修改loadRoomMessages函数
+// 修改 loadRoomMessages 函数以接收和加载历史聊天数据
 async function loadRoomMessages(roomName) {
+    clearMessages(); // 清空当前消息容器
     try {
         const response = await fetch(`/api/messages?room=${encodeURIComponent(roomName)}`);
-        const messages = await response.json();
-        messages.forEach(displayCompleteMessage);
+        if (!response.ok) {
+            console.error('获取历史消息失败，状态码：', response.status);
+            return;
+        }
+        const result = await response.json();
+        const messages = result.data || result; // 兼容返回结果有 data 字段或直接为数组
+        messages.forEach(message => {
+            // 新增：转换历史消息字段（服务端返回的字段为 message 和 sender）
+            if (message.message && message.sender && !message.content) {
+                message.content = message.message;
+                message.username = message.sender;
+            }
+            displayCompleteMessage(message);
+        });
     } catch (error) {
-        console.error('加载消息失败:', error);
+        console.error('加载历史聊天数据出错:', error);
     }
 }
 

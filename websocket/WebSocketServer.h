@@ -35,6 +35,7 @@ public:
     void LeaveRoom(Json::Value mesg, Buffer *output, const ConnectionPtr &conn);
     void BroadcastMessage(const std::string &room_name, const Json::Value mesg);
     void ChatMessage(Json::Value mesg, Buffer *output, const ConnectionPtr &conn);
+    
 
 private:
 void HandleNewConnection(const ConnectionPtr &conn);

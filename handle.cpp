@@ -1,5 +1,7 @@
 #include "handle.h"
 #include "mysql/MysqlConnPool.h"
+#include "until.hpp" // 添加对 until.hpp 的引用
+
 // 在文件顶部添加查询参数解析函数
 std::unordered_map<std::string, std::string> ParseQueryParams(const std::string &query)
 {
@@ -293,70 +295,65 @@ void handleGetChatRooms(const HttpRequest &req, HttpResponse *resp)
 }
 
 // 添加获取用户信息的处理函数
-void handleGetUserInfo(const HttpRequest &req, HttpResponse *resp)
+
+void handleGetMessages(const HttpRequest &req, HttpResponse *resp)
 {
     try
     {
-        std::string authToken = req.GetHeader("Cookie");
-        size_t tokenPos = authToken.find("auth_token=");
-        if (tokenPos == std::string::npos)
-        {
-            throw std::runtime_error("未授权访问");
-        }
-
-        size_t tokenStart = tokenPos + 10;
-        size_t tokenEnd = authToken.find(";", tokenStart);
-        std::string username = authToken.substr(tokenStart,
-                                                tokenEnd == std::string::npos ? std::string::npos : tokenEnd - tokenStart);
+        auto params = ParseQueryParams(req.GetQuery());
+        if (params.find("room") == params.end())
+            throw std::runtime_error("需要提供聊天室参数");
+        // 使用 decode 对房间名称进行解码
+        std::string roomName = decode(params["room"]);
 
         MysqlConnPool *pool = MysqlConnPool::GetInstance();
         auto conn = pool->GetConn();
         if (!conn)
-        {
             throw std::runtime_error("数据库连接失败");
-        }
 
-        std::string sql = "SELECT id, username, email FROM users WHERE username='" + username + "'";
-        auto result = conn->Query(sql);
-        if (!result || !conn->Next())
+        // 根据聊天室名称查询对应的 room id
+        std::string roomId;
+        std::string sqlRoom = "SELECT id FROM rooms WHERE name = '" + roomName + "'";
+        conn->Query(sqlRoom);
+        if (conn->Next())
+            roomId = conn->Value(0);
+        else
+            throw std::runtime_error("未找到对应的聊天室");
+
+        // 查询消息，通过 JOIN 获取发件人用户名，并按时间排序
+        std::string sql = "SELECT m.user_id, u.username, m.content, m.timestamp FROM messages m "
+                          "JOIN users u ON m.user_id = u.id "
+                          "WHERE m.room_id = '" +
+                          roomId + "' ORDER BY m.timestamp ASC";
+        conn->Query(sql);
+
+        Json::Value messages(Json::arrayValue);
+        while (conn->Next())
         {
-            throw std::runtime_error("用户信息未找到");
+            Json::Value message;
+            message["sender"] = conn->Value(1);
+            message["message"] = conn->Value(2);
+            message["timestamp"] = conn->Value(3);
+            messages.append(message);
         }
 
-        Json::Value response;
-        response["success"] = true;
-
-        Json::Value userInfo;
-        userInfo["id"] = conn->Value(0);
-        userInfo["username"] = conn->Value(1);
-        userInfo["email"] = conn->Value(2);
-        response["data"] = userInfo;
+        Json::Value responseJson;
+        responseJson["success"] = true;
+        responseJson["data"] = messages;
 
         Json::StreamWriterBuilder writer;
         writer["emitUTF8"] = true;
         resp->SetStatusCode(HttpStatusCode::k200Ok);
         resp->SetContentType("application/json; charset=utf-8");
-        resp->SetBody(Json::writeString(writer, response));
+        resp->SetBody(Json::writeString(writer, responseJson));
     }
     catch (const std::exception &e)
     {
-        Json::Value response;
-        response["success"] = false;
-        response["message"] = e.what();
-        resp->SetStatusCode(HttpStatusCode::k401Unauthorized);
+        Json::Value responseJson;
+        responseJson["success"] = false;
+        responseJson["message"] = e.what();
+        resp->SetStatusCode(HttpStatusCode::k400BadRequest);
         resp->SetContentType("application/json");
-        resp->SetBody(Json::FastWriter().write(response));
+        resp->SetBody(Json::FastWriter().write(responseJson));
     }
-}
-
-void handleGetMessages(const HttpRequest &req, HttpResponse *resp)
-{
-    // std::string room = req.GetQuery("room");
-    // // 这里根据room从数据库获取消息
-    // Json::Value messages;
-    // // 示例数据 - 实际应从数据库查询
-
-    // resp->SetStatusCode(HttpStatusCode::k200Ok);
-    // resp->SetContentType("application/json");
-    // resp->SetBody(Json::FastWriter().write(messages));
 }

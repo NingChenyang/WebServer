@@ -6,6 +6,7 @@
 #include "websocket/Room.h"
 #include "jsoncpp/json/json.h"
 #include "mysql/MysqlConnPool.h"
+#include    "handle.h"
 // 全局指针用于信号处理
 WebSocketServer *g_server = nullptr;
 std::string Logger::log_file_basename_ = "./logs/ws_server"; // 修改日志路径为相对路径
@@ -55,7 +56,8 @@ void onMessage(const Buffer *input, Buffer *output, const ConnectionPtr &conn)
     else if (msgType == "join")
     {
         std::cout<<"收到加入房间请求"<<std::endl;
-        g_server->JoinRoom(jsonMsg, output,conn);
+        g_server->JoinRoom(jsonMsg, output,conn);//output暂时没有用。
+        // handleGetMessages(jsonMsg, output);
     }
     else if (msgType == "leave")
     {
