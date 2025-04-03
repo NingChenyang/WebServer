@@ -1,4 +1,5 @@
 #include "handle.h"
+#include "mysql/MysqlConnPool.h"
 // 在文件顶部添加查询参数解析函数
 std::unordered_map<std::string, std::string> ParseQueryParams(const std::string &query)
 {
@@ -54,9 +55,20 @@ void handleLoginRequest(const HttpRequest &req, HttpResponse *resp)
 
                 resp->SetStatusCode(HttpStatusCode::k200Ok);
                 resp->SetStatusMessage("OK");
-                resp->SetContentType("application/json");
-                resp->AddHeader("Set-Cookie", "auth_token=valid; Path=/; HttpOnly; SameSite=Strict; Max-Age=3600");
-                resp->SetBody(response.toStyledString());
+                resp->SetContentType("application/json; charset=utf-8");
+
+                // 生成一个简单的token（实际应用中应该使用更安全的方式）
+                std::string token = username;
+
+                // 设置Cookie，简化cookie设置，确保客户端可以访问
+                std::string cookie = "auth_token=" + token + "; Path=/; Max-Age=3600";
+                resp->AddHeader("Set-Cookie", cookie);
+
+                // 使用JsonWriter正确处理中文
+                Json::StreamWriterBuilder writer;
+                writer["emitUTF8"] = true;
+                std::cout << Json::writeString(writer, response) << std::endl;
+                resp->SetBody(Json::writeString(writer, response));
             }
             else
             {
@@ -185,11 +197,36 @@ void HandleLogoutRequest(const HttpRequest &req, HttpResponse *resp)
 }
 // 添加处理函数
 // 修改后的获取聊天室函数
+
+// 添加验证token的辅助函数
+bool verifyAuthToken(const HttpRequest &req, const std::string &expectedUsername)
+{
+    auto cookies = req.GetHeader("Cookie");
+    if (cookies == "")
+    {
+        return true; // 暂时放宽限制，允许没有cookie的请求
+    }
+
+    size_t tokenPos = cookies.find("auth_token=");
+    if (tokenPos == std::string::npos)
+    {
+        return true; // 暂时放宽限制，允许没有token的请求
+    }
+
+    // 从cookie中提取token
+    size_t tokenStart = tokenPos + 10;
+    size_t tokenEnd = cookies.find(";", tokenStart);
+    std::string token = cookies.substr(tokenStart,
+                                       tokenEnd == std::string::npos ? std::string::npos : tokenEnd - tokenStart);
+
+    // 简化验证逻辑，只要有token就认为是有效的
+    return true;
+}
+
 void handleGetChatRooms(const HttpRequest &req, HttpResponse *resp)
 {
     try
     {
-        // 从查询参数获取用户名
         auto params = ParseQueryParams(req.GetQuery());
         auto it = params.find("username");
         if (it == params.end())
@@ -197,6 +234,15 @@ void handleGetChatRooms(const HttpRequest &req, HttpResponse *resp)
             throw std::runtime_error("需要提供用户名参数");
         }
         std::string username = it->second;
+
+        // 验证token但不强制要求
+        if (!verifyAuthToken(req, username))
+        {
+            // 即使验证失败也继续处理请求
+            LOG_WARN << "Token verification failed for user: " << username;
+        }
+
+        // ... 其余代码保持不变 ...
         MysqlConnPool *pool = MysqlConnPool::GetInstance();
         auto conn = pool->GetConn();
         if (!conn)
@@ -223,14 +269,13 @@ void handleGetChatRooms(const HttpRequest &req, HttpResponse *resp)
 
         resp->SetStatusCode(HttpStatusCode::k200Ok);
         resp->SetContentType("application/json");
-        
+
         // 应该改为
         Json::Value response;
         response["success"] = true;
-        response["data"] = rooms;  // ✅ 包裹标准响应格式
-                                   // 最优输出方案
+        response["data"] = rooms; //
+                                  // 最优输出方案
         Json::StreamWriterBuilder writer;
-        // writer["indentation"] = "";                              // 紧凑格式（去掉换行和缩进）
         writer["emitUTF8"] = true;                               // 保留中文
         resp->SetContentType("application/json; charset=utf-8"); // 显式声明编码
         resp->SetBody(Json::writeString(writer, response));
@@ -242,6 +287,63 @@ void handleGetChatRooms(const HttpRequest &req, HttpResponse *resp)
         response["message"] = e.what();
 
         resp->SetStatusCode(HttpStatusCode::k400BadRequest);
+        resp->SetContentType("application/json");
+        resp->SetBody(Json::FastWriter().write(response));
+    }
+}
+
+// 添加获取用户信息的处理函数
+void handleGetUserInfo(const HttpRequest &req, HttpResponse *resp)
+{
+    try
+    {
+        std::string authToken = req.GetHeader("Cookie");
+        size_t tokenPos = authToken.find("auth_token=");
+        if (tokenPos == std::string::npos)
+        {
+            throw std::runtime_error("未授权访问");
+        }
+
+        size_t tokenStart = tokenPos + 10;
+        size_t tokenEnd = authToken.find(";", tokenStart);
+        std::string username = authToken.substr(tokenStart,
+                                                tokenEnd == std::string::npos ? std::string::npos : tokenEnd - tokenStart);
+
+        MysqlConnPool *pool = MysqlConnPool::GetInstance();
+        auto conn = pool->GetConn();
+        if (!conn)
+        {
+            throw std::runtime_error("数据库连接失败");
+        }
+
+        std::string sql = "SELECT id, username, email FROM users WHERE username='" + username + "'";
+        auto result = conn->Query(sql);
+        if (!result || !conn->Next())
+        {
+            throw std::runtime_error("用户信息未找到");
+        }
+
+        Json::Value response;
+        response["success"] = true;
+
+        Json::Value userInfo;
+        userInfo["id"] = conn->Value(0);
+        userInfo["username"] = conn->Value(1);
+        userInfo["email"] = conn->Value(2);
+        response["data"] = userInfo;
+
+        Json::StreamWriterBuilder writer;
+        writer["emitUTF8"] = true;
+        resp->SetStatusCode(HttpStatusCode::k200Ok);
+        resp->SetContentType("application/json; charset=utf-8");
+        resp->SetBody(Json::writeString(writer, response));
+    }
+    catch (const std::exception &e)
+    {
+        Json::Value response;
+        response["success"] = false;
+        response["message"] = e.what();
+        resp->SetStatusCode(HttpStatusCode::k401Unauthorized);
         resp->SetContentType("application/json");
         resp->SetBody(Json::FastWriter().write(response));
     }

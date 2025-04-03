@@ -1,10 +1,27 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // 检查登录状态
-    userManager.checkLogin();
-    // 建立WebSocket连接
-    connectWebSocket();
+document.addEventListener('DOMContentLoaded', async () => {
+    // 使用 await 等待验证完成
+    if (!await userManager.checkLogin()) {
+        return;
+    }
 
-    // 消息发送功能
+    // 获取最新的用户信息
+    const userInfo = userManager.getUserInfo();
+    if (!userInfo) {
+        window.location.replace('login.html');
+        return;
+    }
+
+    // 更新页面上的用户信息显示
+    document.querySelectorAll('.avatar').forEach(avatar => {
+        avatar.textContent = userInfo.username.charAt(0).toUpperCase();
+    });
+    document.getElementById('currentUsername').textContent = userInfo.username;
+
+    // 继续初始化WebSocket和其他功能
+    connectWebSocket();
+    // 初始化获取聊天室列表
+    fetchChatRooms();
+
     const sendBtn = document.getElementById('sendBtn');
     const messageInput = document.getElementById('messageInput');
 
@@ -28,6 +45,15 @@ document.addEventListener('DOMContentLoaded', () => {
             loadRoomMessages(roomName);
         });
     });
+
+    // 修改退出处理
+    window.addEventListener('beforeunload', () => {
+        leaveCurrentRoom();
+        if (ws) {
+            ws.close();
+        }
+        // 不在这里处理cookie，让登出按钮处理
+    });
 });
 
 // WebSocket连接
@@ -41,7 +67,16 @@ let isSending = false;
 // 修改分片大小为更大的值
 const CHUNK_SIZE = 16384; // 16KB
 
+// 在文件顶部添加全局集合，用于记录本地发送的消息 ID
+let localMessageIds = new Set();
+
 function connectWebSocket() {
+    const userInfo = userManager.getUserInfo();
+    if (!userInfo) {
+        console.error('未找到用户信息，无法建立WebSocket连接');
+        return;
+    }
+
     ws = new WebSocket('ws://172.21.211.240:9999');
 
     // 添加心跳定时器
@@ -123,16 +158,24 @@ function sendMessage() {
     }
 
     const userInfo = userManager.getUserInfo();
+    // 生成唯一消息 ID
+    const msgId = `${userInfo.username}-${Date.now()}`;
     const messageData = {
         type: 'message',
         content: message,
         username: userInfo.username,
-        room: '公共大厅',
-        timestamp: new Date().toISOString()
+        room: currentRoom,  // 使用当前房间变量而不是硬编码
+        timestamp: new Date().toISOString(),
+        local: true,  // 新增 local 标记，表示这是本地发送的消息
+        id: msgId     // 新增消息 ID 属性
     };
 
     input.value = '';
     messageQueue.push(messageData);
+    // 发送后立即显示
+    displayMessage(messageData);
+    // 记录本地消息的 ID，防止后续重复显示
+    localMessageIds.add(msgId);
     processMessageQueue();
 }
 
@@ -233,6 +276,11 @@ function reconnectWebSocket() {
 let messageChunks = new Map(); // 存储分片消息
 
 function displayMessage(data) {
+    const currentUser = userManager.getUserInfo();
+    // 如果消息来自当前用户且消息 ID 已记录，则跳过显示（避免重复）
+    if (currentUser && data.username === currentUser.username && data.id && localMessageIds.has(data.id)) {
+        return;
+    }
     if (data.isChunk) {
         const key = data.chunkInfo.messageId;
         if (!messageChunks.has(key)) {
@@ -327,52 +375,37 @@ function formatTime(timestamp) {
 // 在文件顶部添加
 let currentRoom = '公共大厅'; // 当前聊天室
 
-// 修改DOMContentLoaded部分
-document.addEventListener('DOMContentLoaded', () => {
-    userManager.checkLogin();
-    connectWebSocket();
-
-    // 初始化获取聊天室列表
-    fetchChatRooms();
-
-    const sendBtn = document.getElementById('sendBtn');
-    const messageInput = document.getElementById('messageInput');
-
-    sendBtn.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-    });
-
-    // 修复聊天室切换
-    const roomItems = document.querySelectorAll('.room-item');
-    roomItems.forEach(item => {
-        item.addEventListener('click', function () {
-            // 移除之前的active类
-            roomItems.forEach(room => room.classList.remove('active'));
-            // 添加新的active类
-            this.classList.add('active');
-
-            // 更新聊天室标题
-            const roomName = this.textContent.trim();
-            updateRoomTitle(roomName);
-            loadRoomMessages(roomName);
-        });
-    });
-});
-
 // 添加获取聊天室列表函数
 // 修改后的获取聊天室列表请求
 async function fetchChatRooms() {
     try {
         const userInfo = userManager.getUserInfo();
-        const response = await fetch(`/api/chatrooms?username=${encodeURIComponent(userInfo.username)}`);
-        const result = await response.json();
-        if (result.success) {
-            renderRoomList(result.data); // ✅ 访问data字段
-        } else {
-            console.error('请求失败:', result.message);
+        if (!userInfo || !userInfo.username) {
+            console.error('用户未登录');
+            return; // 不要立即跳转，让userManager处理登录
         }
 
+        // 获取authToken，但不立即验证
+        const authToken = document.cookie.split('; ')
+            .find(row => row.startsWith('auth_token='))
+            ?.split('=')[1];
+
+        const response = await fetch(`/api/chatrooms?username=${encodeURIComponent(userInfo.username)}`, {
+            headers: {
+                'Cookie': `auth_token=${authToken || ''}` // 即使没有token也发送请求
+            }
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            renderRoomList(result.data);
+        } else {
+            console.error('获取聊天室列表失败:', result.message);
+            // 如果是认证问题，让userManager处理
+            if (response.status === 401) {
+                userManager.handleAuthError();
+            }
+        }
     } catch (error) {
         console.error('获取聊天室列表失败:', error);
     }
@@ -398,6 +431,9 @@ function renderRoomList(rooms) {
 function switchRoom(roomName) {
     if (roomName === currentRoom) return;
 
+    // 离开当前房间
+    leaveCurrentRoom();
+
     currentRoom = roomName;
     updateRoomTitle(roomName);
     clearMessages();
@@ -405,15 +441,14 @@ function switchRoom(roomName) {
 
     // 更新活动状态
     document.querySelectorAll('.room-item').forEach(item => {
-        // 修改判断逻辑
         item.classList.toggle('active', item.textContent.trim() === roomName);
     });
 
-    // 通知服务器切换房间
+    // 通知服务器加入新房间
     if (isConnected) {
         const userInfo = userManager.getUserInfo();
         ws.send(JSON.stringify({
-            type: 'switch',
+            type: 'join',
             username: userInfo.username,
             room: roomName
         }));
@@ -435,3 +470,23 @@ async function loadRoomMessages(roomName) {
         console.error('加载消息失败:', error);
     }
 }
+
+function leaveCurrentRoom() {
+    if (isConnected && currentRoom) {
+        const userInfo = userManager.getUserInfo();
+        ws.send(JSON.stringify({
+            type: 'leave',
+            username: userInfo.username,
+            room: currentRoom
+        }));
+    }
+}
+
+// 在DOMContentLoaded事件监听器中添加
+window.addEventListener('beforeunload', () => {
+    leaveCurrentRoom();
+    // 关闭WebSocket连接
+    if (ws) {
+        ws.close();
+    }
+});

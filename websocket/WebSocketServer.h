@@ -22,19 +22,19 @@ class WebSocketServer
 public:
     // 在回调函数中，目前还没想到WebsocketPacket类的用处
     // using WebsocketCallback = std::function<void(const Buffer*, Buffer*, WebsocketPacket& respondPacket)>;
-    using WebsocketCallback = std::function<void(const Buffer *, Buffer *)>;
+    using WebsocketCallback = std::function<void(const Buffer *, Buffer *, const ConnectionPtr &)>;
     WebSocketServer(InetAddress &serv_addr, int io_thread_nums, int Worker_thread_nums);
     ~WebSocketServer();
     void Start(const std::string &ip, uint16_t port);
     void Stop();
     void SetWebsocketCallback(WebsocketCallback callback);
 
-    void JoinRoom(const ConnectionPtr &conn, const std::string &room_name);
-    void LeaveRoom(const ConnectionPtr &conn, const std::string &room_name);
-    void BroadcastMessage(const std::string &room_name, const std::string &message);
-    void ChatMessage(const ConnectionPtr &conn, const std::string &message);
 
-
+    //聊天室相关
+    void JoinRoom(Json::Value mesg,Buffer *output ,const ConnectionPtr &conn);
+    void LeaveRoom(Json::Value mesg, Buffer *output, const ConnectionPtr &conn);
+    void BroadcastMessage(const std::string &room_name, const Json::Value mesg);
+    void ChatMessage(Json::Value mesg, Buffer *output, const ConnectionPtr &conn);
 
 private:
 void HandleNewConnection(const ConnectionPtr &conn);
@@ -48,5 +48,6 @@ void HandleNewConnection(const ConnectionPtr &conn);
     ThreadPool worker_pool_;
 
     // 房间列表
+    std::mutex rooms_mutex_;
     std::unordered_map<std::string, std::shared_ptr<Room>> rooms_;
 };

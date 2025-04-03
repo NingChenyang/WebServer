@@ -1,10 +1,12 @@
 #pragma once
 #include <string>
 #include <vector>
+#include"../jsoncpp/json/json.h"
 #include <unordered_set>
 #include "../tcp/util.h"
 #include "../tcp/Connection.h"
 #include "../tcp/Buffer.h"
+#include"WebSocketContext.h"
 #include<mutex>
 class Room
 {
@@ -14,8 +16,8 @@ public:
 
     void AddMember(ConnectionPtr conn);
     void RemoveMember(ConnectionPtr conn);
-    void Broadcast(const std::string &message);
-    
+    void Broadcast(const Json::Value mesg);
+
     int GetId() const { return id_; }
     std::string GetName() const { return name_; }
 

@@ -1,6 +1,24 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // 创建错误信息容器
+    const errorContainer = document.createElement('div');
+    errorContainer.className = 'error-message';
+    const form = document.getElementById('loginForm');
+    form.parentNode.insertBefore(errorContainer, form.nextSibling);
+
+    // 显示错误信息的函数
+    function showError(message) {
+        errorContainer.textContent = message;
+        errorContainer.style.display = 'block';
+        setTimeout(() => {
+            errorContainer.style.display = 'none';
+        }, 3000);
+    }
+
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '登录中...';
 
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
@@ -11,28 +29,31 @@ document.addEventListener('DOMContentLoaded', function () {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password }),
+                credentials: 'include'
             });
 
             const data = await response.json();
-
             if (data.success) {
-                // 获取用户名的首字符作为头像
-                const avatarText = username.charAt(0).toUpperCase();
                 const userInfo = {
                     ...data.data,
-                    avatar: avatarText
+                    avatar: data.data.username.charAt(0).toUpperCase()
                 };
-                // 保存用户信息到localStorage
-                localStorage.setItem('userInfo', JSON.stringify(userInfo));
-                // 跳转到主页
+                // 新增：存储 sessionId（如果服务端返回）
+                if (data.data.sessionId) {
+                    sessionStorage.setItem('sessionId', data.data.sessionId);
+                }
+                sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
                 window.location.href = '/home.html';
             } else {
-                alert(data.message || '登录失败');
+                showError(data.message || '用户名或密码错误');
             }
         } catch (error) {
-            console.error('Login error:', error);
-            alert('登录请求失败');
+            console.error('登录请求出错:', error);
+            showError('网络请求失败，请稍后重试');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '登录';
         }
     });
 });

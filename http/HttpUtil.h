@@ -22,6 +22,7 @@ enum class HttpStatusCode
     k301MovedPermanently = 301,
     k302Found = 302,
     k400BadRequest = 400,
+    k401Unauthorized = 401,
     k404NotFound = 404,
     k500InternalServerError = 500
 };

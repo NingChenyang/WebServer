@@ -5,6 +5,30 @@
     <meta charset="UTF-8">
     <title>登录 - Web服务器</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .error-message {
+            background: #ff6b6b;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 
 <body>

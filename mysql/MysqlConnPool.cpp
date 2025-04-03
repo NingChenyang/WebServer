@@ -1,16 +1,22 @@
 #include "MysqlConnPool.h"
 
-MysqlConnPool::MysqlConnPool():stop_(false)
-{
+// 在文件顶部添加静态实例定义
+MysqlConnPool MysqlConnPool::instance_;
 
+// 删除重复的GetInstance实现
+// 这个实现已经在头文件中内联定义
+
+// 构造函数保持不变
+MysqlConnPool::MysqlConnPool() : stop_(false)
+{
     if (!ParseJsonConfig())
     {
         return;
     }
-        for (int i = 0; i < min_conn_; i++)
-        {
-            AddConn();
-        }
+    for (int i = 0; i < min_conn_; i++)
+    {
+        AddConn();
+    }
     thread produce_thread(&MysqlConnPool::ProduceConn, this);
     thread destroy_thread(&MysqlConnPool::DestroyConn, this);
     produce_thread.detach();
@@ -19,7 +25,8 @@ MysqlConnPool::MysqlConnPool():stop_(false)
 
 bool MysqlConnPool::ParseJsonConfig()
 {
-    fstream file("../mysql/mysql_config.json");
+    std::cout<<system("pwd")<<std::endl;
+    fstream file("./mysql/mysql_config.json");
     if (!file.is_open())
     {
         return false;
@@ -61,7 +68,6 @@ void MysqlConnPool::ProduceConn()
             {
                 return;
             }
-            
         }
         AddConn();
         condQ_.notify_all();
@@ -80,7 +86,7 @@ void MysqlConnPool::DestroyConn()
             {
                 break;
             }
-            
+
             MysqlConn *conn = mysql_connQ_.front();
             if (conn->GetAliveTime() >= max_idle_time_)
             {
@@ -107,11 +113,6 @@ void MysqlConnPool::AddConn()
     mysql_connQ_.push(conn);
 }
 
-MysqlConnPool *MysqlConnPool::GetInstance()
-{
-    static MysqlConnPool mysql_conn_pool;
-    return &mysql_conn_pool;
-}
 
 std::shared_ptr<MysqlConn> MysqlConnPool::GetConn()
 {
@@ -129,12 +130,12 @@ std::shared_ptr<MysqlConn> MysqlConnPool::GetConn()
     }
     shared_ptr<MysqlConn> conn_ptr(mysql_connQ_.front(), [this](MysqlConn *conn)
                                    {
-        unique_lock<mutex> lock(mutexQ_);
-        conn->RefreshAliveTime();
-        mysql_connQ_.push(conn);
-        //由于上面进行循环等待连接，需要唤醒
-        // condQ_.notify_one(); 
-    });
+                                       unique_lock<mutex> lock(mutexQ_);
+                                       conn->RefreshAliveTime();
+                                       mysql_connQ_.push(conn);
+                                       // 由于上面进行循环等待连接，需要唤醒
+                                       //  condQ_.notify_one();
+                                   });
     mysql_connQ_.pop();
     // 唤醒生产者线程
     condQ_.notify_all();

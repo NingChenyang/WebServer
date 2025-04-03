@@ -54,8 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     ...data.data,
                     avatar: avatarText
                 };
-                // 保存用户信息到localStorage
-                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
                 window.location.href = '/home.html';
             } else {
                 showError(data.message || '注册失败');

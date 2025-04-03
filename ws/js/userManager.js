@@ -1,8 +1,7 @@
-// 用户信息管理工具
 const userManager = {
     // 获取用户信息
     getUserInfo() {
-        const userInfo = localStorage.getItem('userInfo');
+        const userInfo = sessionStorage.getItem('userInfo');
         return userInfo ? JSON.parse(userInfo) : null;
     },
 
@@ -11,18 +10,13 @@ const userManager = {
         return this.getUserInfo() !== null;
     },
 
-    // 用户登出
-    logout() {
-        localStorage.removeItem('userInfo');
-        fetch('/api/logout', { method: 'POST' })
-            .finally(() => {
-                window.location.href = '/login.html';
-            });
-    },
-
     // 更新用户信息
     updateUserInfo(userInfo) {
-        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        if (!userInfo || !userInfo.username) {
+            console.error('无效的用户信息');
+            return;
+        }
+        sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
     },
 
     // 更新用户界面
@@ -50,24 +44,50 @@ const userManager = {
         });
     },
 
-    // 改进检查登录状态的方法
-    checkLogin() {
-        const userInfo = this.getUserInfo();
-        if (!userInfo) {
-            // 检查cookie
-            const cookies = document.cookie.split(';');
-            const hasAuthToken = cookies.some(cookie => {
-                const [key, value] = cookie.split('=').map(part => part.trim());
-                return key === 'auth_token' && value === 'valid';
+    // 检查登录状态的方法
+    async checkLogin() {
+        try {
+            const userInfo = this.getUserInfo();
+            if (!userInfo || !userInfo.username) {
+                throw new Error('No user info found');
+            }
+
+            const response = await fetch('/api/user/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
             });
 
-            if (!hasAuthToken) {
-                window.location.replace('login.html');
-                return false;
+            if (!response.ok) {
+                throw new Error('Token verification failed');
             }
+
             return true;
+        } catch (error) {
+            console.error('验证失败:', error);
+            this.clearUserData();
+            window.location.replace('login.html');
+            return false;
         }
-        return true;
+    },
+
+    // 清除用户数据
+    clearUserData() {
+        sessionStorage.removeItem('userInfo');
+        sessionStorage.removeItem('sessionId'); // 新增：清除 sessionId
+        document.cookie = "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    },
+
+    // 新增：退出登录方法
+    logout() {
+        this.clearUserData();
+        // 确保清除所有会话数据
+        sessionStorage.clear();
+        localStorage.clear();
+        document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;";
+        window.location.replace('login.html');
     }
 };
 

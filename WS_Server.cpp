@@ -20,7 +20,7 @@ void SignalHandler(int sig)
     exit(0);
 }
 
-void onMessage(const Buffer *input, Buffer *output)
+void onMessage(const Buffer *input, Buffer *output, const ConnectionPtr &conn)
 {
     std::string msg(input->Peek(), input->ReadableBytes());
 
@@ -49,23 +49,26 @@ void onMessage(const Buffer *input, Buffer *output)
 
     if (msgType == "message")
     {
-        handleChatMessage(jsonMsg, output);
+        std::cout<<"收到消息"<<std::endl;
+        g_server->ChatMessage(jsonMsg, output,conn);
     }
     else if (msgType == "join")
     {
-        handleJoinRoom(jsonMsg, output);
+        std::cout<<"收到加入房间请求"<<std::endl;
+        g_server->JoinRoom(jsonMsg, output,conn);
     }
     else if (msgType == "leave")
     {
-        handleLeaveRoom(jsonMsg, output);
+        std::cout<<"收到离开房间请求"<<std::endl;
+        // g_server->LeaveRoom(jsonMsg, output);
     }
     else if (msgType == "create_room")
     {
-        handleCreateRoom(jsonMsg, output);
+        // g_server->CreateRoom(jsonMsg, output);
     }
     else if (msgType == "user_list")
     {
-        handleUserList(jsonMsg, output);
+        // g_server->UserList(jsonMsg, output);
     }
     else
     {

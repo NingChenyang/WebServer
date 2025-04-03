@@ -1,6 +1,8 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // 检查登录状态
-    userManager.checkLogin();
+    if (!await userManager.checkLogin()) {
+        return;
+    }
 
     // 获取用户信息
     const userInfo = userManager.getUserInfo();
@@ -18,10 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 退出登录功能
+    // 修改退出登录按钮事件
     document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem('userInfo');
-        window.location.href = 'login.html';
+        userManager.logout();
     });
 
     // 添加聊天室相关功能
