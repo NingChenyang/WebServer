@@ -1,0 +1,65 @@
+20250403 16:11:04.577021 95143 INFO  New connection established 64:172.21.208.1:3430 - http/HttpServer.cpp:57
+20250403 16:11:04.702666 95143 INFO  New connection established 65:172.21.208.1:4968 - http/HttpServer.cpp:57
+20250403 16:11:04.703267 95143 INFO  Received message, size=548 - http/HttpServer.cpp:159
+20250403 16:11:04.703281 95143 INFO  Got complete request, path=/home.html - http/HttpServer.cpp:176
+20250403 16:11:04.703887 95144 INFO  Sending response, size=6300 - http/HttpServer.cpp:226
+20250403 16:11:04.741311 95143 INFO  Received message, size=405 - http/HttpServer.cpp:159
+20250403 16:11:04.741329 95143 INFO  Got complete request, path=/css/style.css - http/HttpServer.cpp:176
+20250403 16:11:04.741976 95144 INFO  Sending response, size=16633 - http/HttpServer.cpp:226
+20250403 16:11:04.742289 95143 INFO  Received message, size=394 - http/HttpServer.cpp:159
+20250403 16:11:04.742303 95143 INFO  Got complete request, path=/js/userManager.js - http/HttpServer.cpp:176
+20250403 16:11:04.742750 95144 INFO  Sending response, size=3207 - http/HttpServer.cpp:226
+20250403 16:11:04.744443 95143 INFO  New connection established 67:172.21.208.1:1877 - http/HttpServer.cpp:57
+20250403 16:11:04.745172 95143 INFO  Received message, size=387 - http/HttpServer.cpp:159
+20250403 16:11:04.745191 95143 INFO  Got complete request, path=/js/home.js - http/HttpServer.cpp:176
+20250403 16:11:04.745738 95144 INFO  Sending response, size=3929 - http/HttpServer.cpp:226
+20250403 16:11:04.895407 95143 INFO  Received message, size=480 - http/HttpServer.cpp:159
+20250403 16:11:04.895423 95143 INFO  Got complete request, path=/api/user/verify - http/HttpServer.cpp:176
+20250403 16:11:04.895501 95144 INFO  Sending response, size=60 - http/HttpServer.cpp:226
+20250403 16:11:05.880807 95143 INFO  Received message, size=524 - http/HttpServer.cpp:159
+20250403 16:11:05.880824 95143 INFO  Got complete request, path=/login.html - http/HttpServer.cpp:176
+20250403 16:11:05.880932 95144 INFO  Sending response, size=2030 - http/HttpServer.cpp:226
+20250403 16:11:05.907732 95143 INFO  Received message, size=381 - http/HttpServer.cpp:159
+20250403 16:11:05.907749 95143 INFO  Got complete request, path=/css/style.css - http/HttpServer.cpp:176
+20250403 16:11:05.907863 95144 INFO  Sending response, size=16633 - http/HttpServer.cpp:226
+20250403 16:11:05.907982 95143 INFO  Received message, size=364 - http/HttpServer.cpp:159
+20250403 16:11:05.907994 95143 INFO  Got complete request, path=/js/login.js - http/HttpServer.cpp:176
+20250403 16:11:05.908401 95144 INFO  Sending response, size=2531 - http/HttpServer.cpp:226
+20250403 16:11:10.817134 95143 INFO  Received message, size=528 - http/HttpServer.cpp:159
+20250403 16:11:10.817152 95143 INFO  Got complete request, path=/register.html - http/HttpServer.cpp:176
+20250403 16:11:10.817537 95144 INFO  Sending response, size=1889 - http/HttpServer.cpp:226
+20250403 16:11:10.852367 95143 INFO  Received message, size=384 - http/HttpServer.cpp:159
+20250403 16:11:10.852388 95143 INFO  Got complete request, path=/css/style.css - http/HttpServer.cpp:176
+20250403 16:11:10.852500 95144 INFO  Sending response, size=16633 - http/HttpServer.cpp:226
+20250403 16:11:10.853353 95143 INFO  Received message, size=370 - http/HttpServer.cpp:159
+20250403 16:11:10.853370 95143 INFO  Got complete request, path=/js/register.js - http/HttpServer.cpp:176
+20250403 16:11:10.853823 95144 INFO  Sending response, size=3489 - http/HttpServer.cpp:226
+20250403 16:11:12.491011 95143 INFO  Received message, size=524 - http/HttpServer.cpp:159
+20250403 16:11:12.491026 95143 INFO  Got complete request, path=/login.html - http/HttpServer.cpp:176
+20250403 16:11:12.491144 95144 INFO  Sending response, size=2030 - http/HttpServer.cpp:226
+20250403 16:11:12.519134 95143 INFO  Received message, size=381 - http/HttpServer.cpp:159
+20250403 16:11:12.519151 95143 INFO  Got complete request, path=/css/style.css - http/HttpServer.cpp:176
+20250403 16:11:12.519263 95144 INFO  Sending response, size=16633 - http/HttpServer.cpp:226
+20250403 16:11:12.520005 95143 INFO  Received message, size=364 - http/HttpServer.cpp:159
+20250403 16:11:12.520021 95143 INFO  Got complete request, path=/js/login.js - http/HttpServer.cpp:176
+20250403 16:11:12.520117 95144 INFO  Sending response, size=2531 - http/HttpServer.cpp:226
+20250403 16:11:18.698548 95143 INFO  Received message, size=490 - http/HttpServer.cpp:159
+20250403 16:11:18.698564 95143 INFO  Got complete request, path=/api/login - http/HttpServer.cpp:176
+20250403 16:11:18.738302 95144 INFO  Sending response, size=299 - http/HttpServer.cpp:226
+20250403 16:11:18.755365 95143 INFO  Received message, size=549 - http/HttpServer.cpp:159
+20250403 16:11:18.755380 95143 INFO  Got complete request, path=/home.html - http/HttpServer.cpp:176
+20250403 16:11:18.755477 95144 INFO  Sending response, size=6300 - http/HttpServer.cpp:226
+20250403 16:11:18.779807 95143 INFO  Received message, size=405 - http/HttpServer.cpp:159
+20250403 16:11:18.779824 95143 INFO  Got complete request, path=/css/style.css - http/HttpServer.cpp:176
+20250403 16:11:18.779929 95144 INFO  Sending response, size=16633 - http/HttpServer.cpp:226
+20250403 16:11:18.780212 95143 INFO  Received message, size=394 - http/HttpServer.cpp:159
+20250403 16:11:18.780224 95143 INFO  Got complete request, path=/js/userManager.js - http/HttpServer.cpp:176
+20250403 16:11:18.780300 95144 INFO  Sending response, size=3207 - http/HttpServer.cpp:226
+20250403 16:11:18.781597 95143 INFO  Received message, size=387 - http/HttpServer.cpp:159
+20250403 16:11:18.781614 95143 INFO  Got complete request, path=/js/home.js - http/HttpServer.cpp:176
+20250403 16:11:18.781716 95144 INFO  Sending response, size=3929 - http/HttpServer.cpp:226
+20250403 16:11:18.856904 95143 INFO  Received message, size=480 - http/HttpServer.cpp:159
+20250403 16:11:18.856924 95143 INFO  Got complete request, path=/api/user/verify - http/HttpServer.cpp:176
+20250403 16:11:18.856980 95144 INFO  Sending response, size=60 - http/HttpServer.cpp:226
+20250403 16:11:31.093559 95091 INFO  Worker threads stopped - http/HttpServer.cpp:36
+20250403 16:11:31.093765 95091 INFO  HTTP Server stopped - http/HttpServer.cpp:40

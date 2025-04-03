@@ -69,7 +69,7 @@ void handleLoginRequest(const HttpRequest &req, HttpResponse *resp)
                 // 使用JsonWriter正确处理中文
                 Json::StreamWriterBuilder writer;
                 writer["emitUTF8"] = true;
-                std::cout << Json::writeString(writer, response) << std::endl;
+                // std::cout << Json::writeString(writer, response) << std::endl;
                 resp->SetBody(Json::writeString(writer, response));
             }
             else
